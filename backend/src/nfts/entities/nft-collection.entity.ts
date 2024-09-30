@@ -13,7 +13,7 @@ export class NftCollection {
   })
   owner_id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   hash: string;
 
   @Prop({ required: true })
@@ -22,7 +22,7 @@ export class NftCollection {
   @Prop()
   description: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   image: string;
 
   @Prop({ default: true })

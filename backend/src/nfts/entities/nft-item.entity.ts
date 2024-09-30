@@ -11,7 +11,7 @@ export class NftItem {
   @Prop({ type: String, maxlength: 500 })
   description?: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   image: string;
 
   @Prop({

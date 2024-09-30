@@ -10,7 +10,6 @@ import { BotService } from '../bot/bot.service';
 import { UsersModule } from '../users/users.module';
 import { NftService } from './nft.service';
 import { NftItem, NftItemSchema } from './entities/nft-item.entity';
-import { Link, LinkSchema } from './entities/link.entity';
 import { FileModule } from 'src/file/file.module';
 
 @Module({
@@ -19,7 +18,6 @@ import { FileModule } from 'src/file/file.module';
       { name: NftCollection.name, schema: NftCollectionSchema },
     ]),
     MongooseModule.forFeature([{ name: NftItem.name, schema: NftItemSchema }]),
-    MongooseModule.forFeature([{ name: Link.name, schema: LinkSchema }]),
     HttpModule,
     FileModule,
     UsersModule,

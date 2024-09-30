@@ -9,10 +9,6 @@ export class CreateNftCollectionDto {
   @IsString()
   collection_description?: string;
 
-  @IsOptional()
-  @IsString()
-  collection_image?: string;
-
   @IsNotEmpty()
   @IsNumber()
   items_limit: number;
@@ -26,20 +22,8 @@ export class CreateNftCollectionDto {
   item_description?: string;
 
   @IsNotEmpty()
-  @IsString()
-  item_image: string;
-
-  @IsNotEmpty()
   @IsNumber()
   item_price: number;
-
-  @IsNotEmpty()
-  @IsString()
-  hash: string;
-
-  @IsNotEmpty()
-  @IsString()
-  owner_id: string;
 
   @IsNotEmpty()
   @IsArray()

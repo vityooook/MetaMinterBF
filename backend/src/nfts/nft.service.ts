@@ -17,12 +17,24 @@ export class NftService {
   ) {}
 
   async createCollection(
-    createCollectionDto: CreateNftCollectionDto,
-    user: User,
-    uploadedFiles: any[],
+      createCollectionDto: CreateNftCollectionDto,
+      user: User
   ) {
+    // Generate a unique hash for the collection
     const hash = nanoid(16);
 
+    // Create the NFT item
+    const nftItem: Partial<NftItem> = {
+      title: createCollectionDto.item_name,
+      description: createCollectionDto.item_description,
+      price: createCollectionDto.item_price,
+    };
+
+    const newNftItem = new this.itemModel(nftItem);
+    // Save the NFT item to the database
+    const savedNftItem = await newNftItem.save();
+
+    // Create the NFT collection
     const nftCollection: Partial<NftCollection> = {
       title: createCollectionDto.collection_name,
       description: createCollectionDto.collection_description,
@@ -30,26 +42,19 @@ export class NftService {
       items_limit: createCollectionDto.items_limit,
       owner_id: user._id,
       links: createCollectionDto.links,
-      image: uploadedFiles.find((file) => file.fieldname === 'collection_image')
-        ?.path,
-    };
-
-    const nftItem: Partial<NftItem> = {
-      title: createCollectionDto.item_name,
-      description: createCollectionDto.item_description,
-      price: createCollectionDto.item_price,
-      image: uploadedFiles.find((file) => file.fieldname === 'item_image')
-        ?.path,
+      items: [savedNftItem._id as unknown as string], // Link the saved item to the collection
     };
 
     const newCollection = new this.collectionModel(nftCollection);
-    const newNftItem = new this.collectionModel(nftItem);
+    // Save the NFT collection to the database
+    await newCollection.save();
 
     return {
       status: 'ok',
       hash,
     };
   }
+
 
   async findNftCollectionByHash(hash: string) {
     const collection = await this.collectionModel.findOne({ hash });

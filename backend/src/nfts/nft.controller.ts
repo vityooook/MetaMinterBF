@@ -30,35 +30,20 @@ export class NftController {
   ) {}
 
   @Post('/create')
-  @UseInterceptors(
-    FileInterceptor('nftCollectionImage', {
-      storage: diskStorage({
-        destination: './assets/images/collections', // Destination folder for collection images
-        filename: editFileName, // Logic to define file name
-      }),
-      fileFilter: imageFileFilter, // Optional filter to validate file types (e.g., images only)
-    }),
-  )
-  @UseInterceptors(
-    FileInterceptor('nftItemImage', {
-      storage: diskStorage({
-        destination: './assets/images/items', // Destination folder for item images
-        filename: editFileName, // Logic to define file name
-      }),
-      fileFilter: imageFileFilter, // Optional filter to validate file types (e.g., images only)
-    }),
-  )
   async createCollection(
-    @UploadedFiles(ParseFilePipe) files: Array<Express.Multer.File>,
-    @Body() createCollectionDto: CreateNftCollectionDto,
-    @CurrentUser() currentUser,
+      @Body() createCollectionDto: CreateNftCollectionDto,
+      @CurrentUser() currentUser,// Get files if needed
   ) {
-    const uploadedFiles = await this.fileService.handleFiles(files);
+    // You will need to handle multiple files. They are accessed via the files array.
+    console.log('Received DTO:', createCollectionDto);
+
+    // Handle each file as needed
+    // const collectionImage = files[0]; // Assuming this is the collection image
+    // const itemImage = files[1]; // Assuming this is the item image
 
     return await this.nftService.createCollection(
-      createCollectionDto,
-      currentUser,
-      uploadedFiles
+        createCollectionDto,
+        currentUser,
     );
   }
 
