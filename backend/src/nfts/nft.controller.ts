@@ -8,56 +8,63 @@ import {
   UseInterceptors,
   UploadedFiles,
   ParseFilePipe,
-} from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/auth.guard';
-import { NftService } from './nft.service';
-import { CreateNftCollectionDto } from './dto/create-nft-collection.dto';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { FileService } from 'src/file/file.service';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+  UploadedFile,
+} from "@nestjs/common";
+import { JwtAuthGuard } from "../auth/auth.guard";
+import { NftService } from "./nft.service";
+import { CreateNftCollectionDto } from "./dto/create-nft-collection.dto";
+import { CurrentUser } from "src/auth/decorators/current-user.decorator";
+import { FileService } from "src/file/file.service";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
 import {
   editFileName,
   imageFileFilter,
-} from 'src/file/utils/file-upload.utils';
+} from "src/file/utils/file-upload.utils";
 
 @UseGuards(JwtAuthGuard)
-@Controller('api/collections')
+@Controller("api/collections")
 export class NftController {
   constructor(
     private readonly nftService: NftService,
-    private readonly fileService: FileService, // Inject file service
+    private readonly fileService: FileService,
   ) {}
 
-  @Post('/create')
+  @Post("/create")
+  @UseInterceptors(
+    FileInterceptor("collectionImage", {
+      storage: diskStorage({
+        destination: "./assets/images/items",
+        filename: editFileName,
+      }),
+    }),
+  )
   async createCollection(
-      @Body() createCollectionDto: CreateNftCollectionDto,
-      @CurrentUser() currentUser,// Get files if needed
+    @Body() createCollectionDto: CreateNftCollectionDto,
+    @UploadedFile() collectionImage: Express.Multer.File,
+    @CurrentUser() currentUser,
   ) {
-    // You will need to handle multiple files. They are accessed via the files array.
-    console.log('Received DTO:', createCollectionDto);
+    console.log("Received DTO:", createCollectionDto);
 
-    // Handle each file as needed
-    // const collectionImage = files[0]; // Assuming this is the collection image
-    // const itemImage = files[1]; // Assuming this is the item image
+    console.log(collectionImage);
 
     return await this.nftService.createCollection(
-        createCollectionDto,
-        currentUser,
+      createCollectionDto,
+      currentUser,
     );
   }
 
-  @Get(':hash')
-  async getNftCollectionByHash(@Param('hash') hash: string) {
+  @Get(":hash")
+  async getNftCollectionByHash(@Param("hash") hash: string) {
     return await this.nftService.findNftCollectionByHash(hash);
   }
 
-  @Get(':hash')
-  async getNftItemByHash(@Param('hash') hash: string) {
+  @Get(":hash")
+  async getNftItemByHash(@Param("hash") hash: string) {
     return await this.nftService.findNftItemByHash(hash);
   }
 
-  @Get('')
+  @Get("")
   async findUserCollections(@CurrentUser() currentUser) {
     return await this.nftService.findUserCollections(currentUser);
   }

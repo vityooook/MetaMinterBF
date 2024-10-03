@@ -1,13 +1,9 @@
 import { Link } from "react-router-dom";
 import catImg from "~/assets/images/cat.jpg";
+import { NftCollectionDto } from "~/db/dto";
 
 interface CollectionListProps {
-  collection: {
-    hash: string;
-    title: string;
-    items_limit: number;
-    items: { price: number }[];
-  };
+  collection: NftCollectionDto;
   toncoin_price: number;
 }
 
@@ -22,7 +18,7 @@ export const CollectionList: React.FC<CollectionListProps> = ({
   };
 
   return (
-    <Link to={`/mint/${collection.hash}`} className="router-link-no-style">
+    <Link to={`/collections/${collection.hash}`} className="router-link-no-style">
       <div className="flex gap-4 items-center collection-item">
         <img
           src={catImg}

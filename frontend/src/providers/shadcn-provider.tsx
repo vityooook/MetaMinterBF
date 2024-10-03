@@ -41,7 +41,7 @@ export function ThemeProvider({
       return;
     }
 
-    handleTheme(theme);
+    handleTheme('dark');
 
     root.classList.add(theme);
   }, [theme]);

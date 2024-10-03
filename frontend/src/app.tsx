@@ -8,12 +8,16 @@ import {
 } from "@telegram-apps/sdk-react";
 import { useEffect } from "react";
 import { Toaster } from "~/components/ui/toaster";
-import { MainPage } from "./pages/home/page";
 import { useTheme } from "./providers/shadcn-provider";
 import { WelcomePage } from "./pages/welcome/page";
+import { CollectionPage } from "./pages/collections/page";
+import { useCollections } from "./hooks/useCollections";
+import { CollectionView } from "./pages/collections/view/page";
+import { CollectionCreate } from "./pages/collections/create/page";
 
 function App() {
   useAuth();
+  useCollections();
 
   const theme = useTheme();
   const themeParams = useThemeParams();
@@ -36,13 +40,16 @@ function App() {
   }, []);
 
   return (
-    <>
+    <div className="container max-w-xl py-4">
       <Routes>
-        <Route path="/" element={<MainPage />} />
+        <Route path="/" element={<CollectionPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/collections" element={<CollectionPage />} />
+        <Route path="/collections/create" element={<CollectionCreate />} />
+        <Route path="/collections/:hash" element={<CollectionView />} />
       </Routes>
       <Toaster />
-    </>
+    </div>
   );
 }
 

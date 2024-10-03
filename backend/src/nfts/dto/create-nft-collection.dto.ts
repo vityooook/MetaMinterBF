@@ -3,27 +3,27 @@ import { IsNotEmpty, IsString, IsOptional, IsNumber, IsArray } from 'class-valid
 export class CreateNftCollectionDto {
   @IsNotEmpty()
   @IsString()
-  collection_name: string;
+  collectionName: string;
 
   @IsOptional()
   @IsString()
-  collection_description?: string;
+  collectionDescription?: string;
 
   @IsNotEmpty()
   @IsNumber()
-  items_limit: number;
+  itemsLimit: number;
 
   @IsNotEmpty()
   @IsString()
-  item_name: string;
+  itemName: string;
 
   @IsOptional()
   @IsString()
-  item_description?: string;
+  itemDescription?: string;
 
   @IsNotEmpty()
   @IsNumber()
-  item_price: number;
+  itemPrice: number;
 
   @IsNotEmpty()
   @IsArray()

@@ -1,44 +1,45 @@
 import { create } from "zustand";
+import { NftCollectionDto } from "./dto";
 
 export interface CollectionStore {
-  Collections: CollectionDto[];
+  collections: NftCollectionDto[];
 
-  getCollection: (collectionId: string) => CollectionDto | undefined;
-  setCollections: (Collections: CollectionDto[]) => void;
+  getCollection: (collectionHash: string) => NftCollectionDto | undefined;
+  setCollections: (Collections: NftCollectionDto[]) => void;
   patchCollection: (
     collectionId: string,
-    CollectionPartial: Partial<CollectionDto>
+    CollectionPartial: Partial<NftCollectionDto>
   ) => void;
 }
 
 export const useCollectionStore = create<CollectionStore>((set, get) => ({
-  Collections: [],
-  getCollection: (collectionId) => {
-    return get().Collections.find((q) => q._id === collectionId);
+  collections: [],
+  getCollection: (collectionHash) => {
+    return get().collections.find((q) => q.hash === collectionHash);
   },
 
-  patchCollection: (collectionId, CollectionPartial) => {
+  patchCollection: (collectionId, collectionPartial) => {
     set((state) => {
-      const Collections = [...state.Collections];
-      const index = Collections.findIndex((q) => q._id === collectionId);
+      const collections = [...state.collections];
+      const index = collections.findIndex((q) => q._id === collectionId);
 
       if (index !== -1) {
-        Collections[index] = {
-          ...Collections[index],
-          ...CollectionPartial,
+        collections[index] = {
+          ...collections[index],
+          ...collectionPartial,
         };
       }
 
       return {
         ...state,
-        Collections,
+        collections: collections,
       };
     });
   },
 
-  setCollections: (Collections) => {
+  setCollections: (collections) => {
     set(() => ({
-      Collections: Collections,
+      collections,
     }));
   },
 }));
