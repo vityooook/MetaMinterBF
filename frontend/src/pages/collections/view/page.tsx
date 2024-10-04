@@ -1,11 +1,11 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import SocialLogo from "~/components/socia-logo";
-import catImg from "~/assets/images/cat.jpg";
 import { useCollectionStore } from "~/db/collectionStore";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { minifyAddress } from "~/lib/utils";
+import { getImageUrl } from "~/api/utils";
 
 export const CollectionView: React.FC = () => {
   const { hash } = useParams<{ hash: string }>();
@@ -15,11 +15,13 @@ export const CollectionView: React.FC = () => {
     <div className="-mt-4">
       {collection && collection.deployed ? (
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
-          <img
-            src={catImg}
-            className="rounded-2xl w-32 h-32"
-            alt={collection.image}
-          />
+          {collection.imageUrl && (
+            <img
+              src={getImageUrl(collection.imageUrl)}
+              className="rounded-2xl w-32 h-32"
+              alt={collection.image}
+            />
+          )}
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
           <div className="text-muted-foreground">{collection.description}</div>
           {collection.links.length > 0 && (
@@ -84,11 +86,13 @@ export const CollectionView: React.FC = () => {
           <h2 className="text-lg font-bold mb-2">Your NFT Item preview</h2>
 
           <Card className="card flex flex-col items-center py-4">
-            <img
-              src={catImg}
-              className="rounded-2xl w-32 h-32"
-              alt={collection.items[0].image}
-            />
+            {collection.items[0].imageUrl && (
+              <img
+                src={getImageUrl(collection.items[0].imageUrl)}
+                className="rounded-2xl w-32 h-32"
+                alt={collection.image}
+              />
+            )}
             <h1 className="text-2xl font-semibold">
               {collection.items[0].name}
             </h1>

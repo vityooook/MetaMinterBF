@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import catImg from "~/assets/images/cat.jpg";
+import { getImageUrl } from "~/api/utils";
 import { NftCollection } from "~/db/models";
 
 interface CollectionItemProps {
@@ -23,11 +23,13 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
       className="block p-3 border-b border-border last:border-none"
     >
       <div className="flex gap-4 items-center collection-item">
-        <img
-          src={catImg}
-          alt={collection.image}
-          className="w-10 h-10 rounded-lg"
-        />
+        {collection.imageUrl && (
+          <img
+            src={getImageUrl(collection.imageUrl)}
+            alt={collection.image}
+            className="w-10 h-10 rounded-lg"
+          />
+        )}
         <div className="flex-grow flex flex-col justify-between">
           <div className="text-lg font-semibold">{collection.name}</div>
           <div className="text-sm text-gray-500">

@@ -18,22 +18,29 @@ export class NftService {
     @InjectModel(NftItem.name) private readonly itemModel: Model<NftItem>,
   ) {}
 
-  async createCollection(createCollectionDto: NftCollectionDto, user: User) {
+  async createCollection(
+    createCollectionDto: NftCollectionDto,
+    files: { [key: string]: Express.Multer.File[] },
+    user: User,
+  ) {
     const hash = nanoid(16);
 
     const savedNftItems = await Promise.all(
-      createCollectionDto.items.map(async (item) => {
+      createCollectionDto.items.map(async (item, index) => {
         const nftItem: Partial<NftItem> = {
           name: item.name,
           description: item.description,
           price: item.price,
+          imageUrl: files["items.image"]?.[index]?.path,
         };
 
         const newNftItem = new this.itemModel(nftItem);
-        // Save the NFT item to the database
+
         return await newNftItem.save();
       }),
     );
+
+    const collectionImagePath = files["image"]?.[0]?.path;
 
     const nftCollection: Partial<NftCollection> = {
       name: createCollectionDto.name,
@@ -43,27 +50,29 @@ export class NftService {
       owner_id: user._id,
       links: createCollectionDto.links,
       items: savedNftItems.map((item) => item._id.toString()),
+      imageUrl: collectionImagePath,
     };
 
     const newCollection = new this.collectionModel(nftCollection);
-    // Save the NFT collection to the database
+
     await newCollection.save();
 
-    // const collectionAddress = this.createNftBlockchain(
-    //   hash,
-    //   "0:f00ed079a094b3b98c74aee5a55707822dc494f73c6b1ddd1b830eddd65cbead",
-    //   BigInt(1e8),
-    //   0,
-    // );
-    // // newCollection.address = collectionAddress;
-
-    // await newCollection.save();
-
-    return {
+    const response = {
       status: "ok",
-      // collectionAddress,
+      collection: {
+        ...nftCollection,
+        items: savedNftItems.map((item) => ({
+          _id: item._id.toString(),
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          imageUrl: item.imageUrl,
+        })),
+      },
       hash,
     };
+
+    return response;
   }
 
   async findNftCollectionByHash(hash: string) {

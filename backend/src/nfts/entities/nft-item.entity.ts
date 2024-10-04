@@ -12,7 +12,7 @@ export class NftItem {
   description?: string;
 
   @Prop({ required: false })
-  image: string;
+  imageUrl: string;
 
   @Prop({
     type: Number,
