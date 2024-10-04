@@ -13,5 +13,6 @@ export type NftCollection = CollectionFormData & {
   _id: string;
   hash: string;
   deployed: boolean;
-  items: NftItem[]
+  items: NftItem[];
+  address: string;
 };

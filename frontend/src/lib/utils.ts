@@ -6,6 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function minifyAddress(address: string) {
+  const l = address.length;
+  return `${address.substring(0, 4)}...${address.substring(l - 4, l)}`;
+}
+
 export function getUserInitials(user: UserModel): string {
   const { firstName, lastName } = user;
   const firstNameInitial = firstName.charAt(0);
