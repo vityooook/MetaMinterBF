@@ -12,7 +12,7 @@ export const collectionSchema = z.object({
   name: z.string().min(1, "Название коллекции обязательно"),
   description: z.string().min(1, "Описание коллекции обязательно"),
   itemsLimit: z.coerce.number().min(1, "Лимит предметов должен быть больше 0").optional(),
-  links: z.array(z.string().url("Invalid URL")).min(1, "At least one link is required"),
+  links: z.array(z.string().url("Invalid URL")).optional(),
   items: z.array(itemSchema).min(1, "At least one item is required"), // Require at least one item
 });
 

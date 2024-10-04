@@ -24,7 +24,7 @@ export const CollectionView: React.FC = () => {
           )}
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
           <div className="text-muted-foreground">{collection.description}</div>
-          {collection.links.length > 0 && (
+          {collection && collection.links && collection.links.length > 0 && (
             <div className="flex">
               {collection.links.map((url, index) => (
                 <Link to={url} target="_blank" key={index}>

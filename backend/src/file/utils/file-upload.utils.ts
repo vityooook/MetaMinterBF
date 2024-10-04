@@ -12,7 +12,7 @@ export const editFileName = (req, file, callback) => {
 };
 
 export const imageFileFilter = (req, file, callback) => {
-  if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|svg)$/)) {
+  if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|svg|webp)$/)) {
     return callback(new Error('Only image files are allowed!'), false);
   }
   callback(null, true);

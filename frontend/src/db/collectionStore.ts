@@ -5,10 +5,11 @@ export interface CollectionStore {
   collections: NftCollection[];
 
   getCollection: (collectionHash: string) => NftCollection | undefined;
-  setCollections: (Collections: NftCollection[]) => void;
+  setCollections: (collections: NftCollection[]) => void;
+  addCollection: (newCollection: NftCollection) => void; // New method
   patchCollection: (
     collectionId: string,
-    CollectionPartial: Partial<NftCollection>
+    collectionPartial: Partial<NftCollection>
   ) => void;
 }
 
@@ -16,6 +17,12 @@ export const useCollectionStore = create<CollectionStore>((set, get) => ({
   collections: [],
   getCollection: (collectionHash) => {
     return get().collections.find((q) => q.hash === collectionHash);
+  },
+
+  addCollection: (newCollection) => {
+    set((state) => ({
+      collections: [newCollection, ...state.collections], // Add the new collection
+    }));
   },
 
   patchCollection: (collectionId, collectionPartial) => {

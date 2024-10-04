@@ -19,7 +19,9 @@ export const createCollection = async (data: CollectionFormData) => {
   }
 
   // Append links
-  data.links.forEach((link) => formData.append("links[]", link));
+  if (data.links) {
+    data.links.forEach((link) => formData.append("links[]", link));
+  }
 
   // Append items details
   data.items.forEach((item, index) => {

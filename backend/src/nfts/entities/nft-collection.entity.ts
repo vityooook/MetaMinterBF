@@ -47,6 +47,9 @@ export class NftCollection {
     type: [{ type: String }],
   })
   links: string[];
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const NftCollectionSchema = SchemaFactory.createForClass(NftCollection);

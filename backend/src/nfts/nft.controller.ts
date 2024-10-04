@@ -15,7 +15,10 @@ import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { FileService } from "src/file/file.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
-import { editFileName } from "src/file/utils/file-upload.utils";
+import {
+  editFileName,
+  imageFileFilter,
+} from "src/file/utils/file-upload.utils";
 
 @UseGuards(JwtAuthGuard)
 @Controller("api/collections")
@@ -43,6 +46,7 @@ export class NftController {
           },
           filename: editFileName,
         }),
+        fileFilter: imageFileFilter,
       },
     ),
   )

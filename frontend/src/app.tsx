@@ -49,6 +49,7 @@ function App() {
         <Route path="/collections/:hash" element={<CollectionView />} />
       </Routes>
       <Toaster />
+      
     </div>
   );
 }

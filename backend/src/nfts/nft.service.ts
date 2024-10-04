@@ -58,18 +58,16 @@ export class NftService {
     await newCollection.save();
 
     const response = {
-      status: "ok",
-      collection: {
-        ...nftCollection,
-        items: savedNftItems.map((item) => ({
-          _id: item._id.toString(),
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          imageUrl: item.imageUrl,
-        })),
-      },
+      ...nftCollection,
       hash,
+      deployed: true,
+      items: savedNftItems.map((item) => ({
+        _id: item._id.toString(),
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        imageUrl: item.imageUrl,
+      })),
     };
 
     return response;
@@ -94,6 +92,7 @@ export class NftService {
     return await this.collectionModel
       .find({ owner_id: user._id })
       .populate("items")
+      .sort({ updatedAt: -1 })
       .exec();
   }
 

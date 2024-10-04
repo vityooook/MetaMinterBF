@@ -19,6 +19,8 @@ export class NftItem {
   })
   price?: number;
 
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const NftItemSchema = SchemaFactory.createForClass(NftItem);

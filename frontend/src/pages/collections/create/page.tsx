@@ -5,22 +5,32 @@ import { toast } from "~/components/ui/use-toast";
 import { CollectionForm } from "./ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createCollection } from "~/api/back";
+import { useCollectionStore } from "~/db/collectionStore";
+import { useNavigate } from "react-router-dom";
 
 export const CollectionCreate = () => {
+  const { addCollection } = useCollectionStore();
+  const navigate = useNavigate();
+
   const mutation = useMutation({
     mutationFn: createCollection,
-    onSuccess: () => {
+    onSuccess: (newCollection) => {
       toast({
         title: "Коллекция успешно добавлена",
+      });
+      addCollection(newCollection);
+      navigate("/");
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка при добавлении коллекции",
+        variant: "destructive",
       });
     },
   });
 
   const handleSubmit: SubmitHandler<CollectionFormData> = async (formData) => {
     mutation.mutate(formData);
-
-    // const hash = newCollection.hash;
-    //   const shareLink = `https://t.me/share/url?url=${BOT_URL}/app?startapp=c_${hash}`;
   };
 
   const form = useForm<CollectionFormData>({
@@ -30,33 +40,12 @@ export const CollectionCreate = () => {
       description: "",
       items: [],
       itemsLimit: 1,
-      links: [""],
+      links: [],
     },
   });
 
   return (
     <main>
-      {/* {creationStep === 1 && (
-        <ConfirmationAlert
-          collectionImg={collectionImg}
-          itemImg={itemImg}
-          collectionName={collectionName}
-          collectionDescription={collectionDescription}
-          itemName={itemName}
-          itemPrice={itemPrice}
-          itemsLimit={itemsLimit}
-          links={links}
-          nextStep={sendData}
-        />
-      )}
-
-      {creationStep === 2 && (
-        <CreationAlert
-          collectionImg={collectionImg}
-          newCollectionCreated={newCollectionCreated}
-        />
-      )} */}
-
       <CollectionForm form={form} onSubmit={handleSubmit} />
     </main>
   );

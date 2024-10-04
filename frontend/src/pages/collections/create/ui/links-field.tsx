@@ -19,7 +19,7 @@ interface LinksFieldProps {
 
 export const LinksField: React.FC<LinksFieldProps> = ({ form, label, max = 5 }) => {
   const { control, register, setFocus } = form;
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove,  } = useFieldArray({
     control,
     //@ts-ignore TODO: fix in future
     name: "links",
