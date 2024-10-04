@@ -13,6 +13,7 @@ import {
 import { CollectionFormData } from "../zod";
 import { Textarea } from "~/components/ui/textarea";
 import { LinksField } from "./links-field";
+import { ImageUploadPreview } from "~/components/ui/image-uploader";
 
 interface CollectionFormProps {
   formData?: CollectionFormData; // Optional prop for editing
@@ -34,18 +35,16 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
           name="image"
           render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
-              <FormLabel>Изображение коллекции</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  {...field}
-                  value={value?.fileName}
-                  onChange={(event: any) => {
-                    onChange(event.target.files[0]);
-                  }}
-                />
-              </FormControl>
+              <div className="flex flex-col items-center gap-2">
+                <FormControl>
+                  <ImageUploadPreview
+                    value={value}
+                    onChange={onChange}
+                    accept=".jpg,.jpeg,.png,.webp,.gif,.svg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -85,23 +84,23 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
         <LinksField form={form} label="Links" />
 
+        <h2 className="font-bold text-center pt-8">NFT Info</h2>
+
         <FormField
           control={form.control}
-          name="items.0.image" // Update to handle only one item
+          name="items.0.image"
           render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
-              <FormLabel>Изображение коллекции</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  {...field}
-                  value={value?.fileName}
-                  onChange={(event: any) => {
-                    onChange(event.target.files[0]);
-                  }}
-                />
-              </FormControl>
+              <div className="flex flex-col items-center gap-2">
+                <FormControl>
+                  <ImageUploadPreview
+                    value={value}
+                    onChange={onChange}
+                    accept=".jpg,.jpeg,.png,.webp,.gif,.svg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -179,9 +178,11 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
           )}
         />
 
-        <Button type="submit" className="w-full">
-          Добавить коллекцию
-        </Button>
+        <footer className="pt-8">
+          <Button type="submit" className="w-full" size="lg">
+            Добавить коллекцию
+          </Button>
+        </footer>
       </form>
     </Form>
   );
