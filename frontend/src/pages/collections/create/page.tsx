@@ -26,12 +26,10 @@ export const CollectionCreate = () => {
   const form = useForm<CollectionFormData>({
     resolver: zodResolver(collectionSchema),
     defaultValues: {
-      collectionName: "",
-      collectionDescription: "",
-      itemName: "",
-      itemDescription: "",
+      name: "",
+      description: "",
+      items: [],
       itemsLimit: 1,
-      itemPrice: 0,
       links: [""],
     },
   });

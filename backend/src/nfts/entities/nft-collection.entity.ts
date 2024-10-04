@@ -17,7 +17,7 @@ export class NftCollection {
   hash: string;
 
   @Prop({ required: true })
-  title: string;
+  name: string;
 
   @Prop()
   description: string;
@@ -32,10 +32,10 @@ export class NftCollection {
   address: string;
 
   @Prop({ default: 0 })
-  items_minted: number;
+  itemsMinted: number;
 
   @Prop({ default: 0 })
-  items_limit: number;
+  itemsLimit: number;
 
   @Prop({
     type: [{ type: SchemaTypes.ObjectId, ref: 'NftItem', default: [] }],
@@ -47,9 +47,6 @@ export class NftCollection {
     type: [{ type: String }],
   })
   links: string[];
-
-  @Prop()
-  collection_address: string;
 }
 
 export const NftCollectionSchema = SchemaFactory.createForClass(NftCollection);

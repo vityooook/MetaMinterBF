@@ -73,11 +73,11 @@
     --destructive: hsl(14, 100%, 57%);
     --destructive-foreground: hsl(0 0% 98%);
 
-    --border: hsl(240 3.7% 15.9%);
-    --input: hsl(0, 0%, 54%);
+    --border: hsl(0, 0%, 20%);
+    --input: hsl(0, 0%, 61%);
     --ring: hsl(240 4.9% 83.9%);
 
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 }
 

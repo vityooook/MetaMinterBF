@@ -12,10 +12,14 @@ import {
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { NftService } from "./nft.service";
-import { CreateNftCollectionDto } from "./dto/create-nft-collection.dto";
+import { NftCollectionDto } from "./dto/nft-collection";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { FileService } from "src/file/file.service";
-import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+  FilesInterceptor,
+} from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import {
   editFileName,
@@ -32,21 +36,34 @@ export class NftController {
 
   @Post("/create")
   @UseInterceptors(
-    FileInterceptor("collectionImage", {
-      storage: diskStorage({
-        destination: "./assets/images/items",
-        filename: editFileName,
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: "image", maxCount: 1 },
+        { name: "items.image", maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            // Use the field name to determine the destination
+            const dest =
+              file.fieldname === "image"
+                ? "./assets/images/collections"
+                : "./assets/images/items";
+            cb(null, dest); // Callback with destination
+          },
+          filename: editFileName, // Use custom filename function
+        }),
+      },
+    ),
   )
   async createCollection(
-    @Body() createCollectionDto: CreateNftCollectionDto,
-    @UploadedFile() collectionImage: Express.Multer.File,
+    @Body() createCollectionDto: NftCollectionDto,
+    @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() currentUser,
   ) {
     console.log("Received DTO:", createCollectionDto);
 
-    console.log(collectionImage);
+    console.log(files);
 
     return await this.nftService.createCollection(
       createCollectionDto,

@@ -31,8 +31,8 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="collectionImage"
-          render={({ field: {value, onChange, ...field} }) => (
+          name="image"
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Изображение коллекции</FormLabel>
               <FormControl>
@@ -44,7 +44,6 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                   onChange={(event: any) => {
                     onChange(event.target.files[0]);
                   }}
-                  // No need to set value here, as it's not allowed for file inputs
                 />
               </FormControl>
               <FormMessage />
@@ -54,7 +53,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
         <FormField
           control={form.control}
-          name="collectionName"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Название коллекции</FormLabel>
@@ -68,7 +67,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
         <FormField
           control={form.control}
-          name="collectionDescription"
+          name="description"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Описание коллекции</FormLabel>
@@ -88,12 +87,20 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
         <FormField
           control={form.control}
-          name="itemImage"
-          render={({ field }) => (
+          name="items.0.image" // Update to handle only one item
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
-              <FormLabel>Изображение предмета</FormLabel>
+              <FormLabel>Изображение коллекции</FormLabel>
               <FormControl>
-                <Input type="file" accept="image/*" {...field} value="" />
+                <Input
+                  type="file"
+                  accept="image/*"
+                  {...field}
+                  value={value?.fileName}
+                  onChange={(event: any) => {
+                    onChange(event.target.files[0]);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -102,7 +109,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
         <FormField
           control={form.control}
-          name="itemName"
+          name="items.0.name" // Update to handle only one item
           render={({ field }) => (
             <FormItem>
               <FormLabel>Название предмета</FormLabel>
@@ -116,7 +123,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
         <FormField
           control={form.control}
-          name="itemDescription"
+          name="items.0.description" // Update to handle only one item
           render={({ field }) => (
             <FormItem>
               <FormLabel>Описание предмета</FormLabel>
@@ -124,6 +131,24 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                 <Textarea
                   rows={3}
                   placeholder="Введите описание предмета"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="items.0.price" // Update to handle only one item
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Цена предмета</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Введите цену предмета"
+                  type="number"
                   {...field}
                 />
               </FormControl>
@@ -148,27 +173,6 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
               <FormDescription>
                 How many items should be available for mint. Leave empty if
                 there's no limit
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="itemPrice"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Цена предмета</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Введите цену предмета"
-                  type="number"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Available values from 0.15 TON to 99999 TON
               </FormDescription>
               <FormMessage />
             </FormItem>

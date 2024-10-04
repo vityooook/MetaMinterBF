@@ -6,7 +6,7 @@ export type NftItemDocument = NftItem & Document;
 @Schema({ timestamps: true })
 export class NftItem {
   @Prop({ required: true })
-  title: string;
+  name: string;
 
   @Prop({ type: String, maxlength: 500 })
   description?: string;

@@ -16,7 +16,7 @@ export const CollectionView: React.FC = () => {
             className="collection-img"
             alt={collection.image}
           /> */}
-          <h1>{collection.title}</h1>
+          <h1>{collection.name}</h1>
           <div className="description muted">{collection.description}</div>
           {collection.links.length > 0 && (
             <div className="links-container">
@@ -69,36 +69,36 @@ export const CollectionView: React.FC = () => {
           <div className="card-row">
             <div className="card-row__left">Items</div>
             <div className="card-row__right">
-              {collection.items_limit === 0 ? "∞" : collection.items_limit}
+              {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit}
             </div>
           </div>
           <div className="card-row">
             <div className="card-row__left">Price</div>
             <div className="card-row__right">
-              {collection.items[0]?.price} TON
+              {collection.items[0].price} TON
             </div>
           </div>
         </div>
       )}
 
-      {collection?.items[0] && (
-        <div className="card-subtitle">Your NFT Item preview</div>
-      )}
+      {collection && collection?.items?.length > 0 && (
+        <>
+          <div className="card-subtitle">Your NFT Item preview</div>
 
-      {collection?.items[0] && (
-        <div className="card nft-preview">
-          {/* <img
+          <div className="card nft-preview">
+            {/* <img
             src={imgSrc(collection.items[0].image)}
             className="nft-preview__img"
             alt={collection.items[0].title}
           /> */}
-          <div className="nft-preview__text">
-            <h3>{collection.items[0].title}</h3>
-            <p className="muted" style={{ marginTop: ".5rem" }}>
-              {collection.items[0].description}
-            </p>
+            <div className="nft-preview__text">
+              <h3>{collection.items[0].name}</h3>
+              <p className="muted" style={{ marginTop: ".5rem" }}>
+                {collection.items[0].description}
+              </p>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { NftCollection } from "./entities/nft-collection.entity";
 import { User } from "../users/entities/user.entity";
-import { CreateNftCollectionDto } from "./dto/create-nft-collection.dto";
+import { NftCollectionDto } from "./dto/nft-collection";
 import { NftItem } from "./entities/nft-item.entity";
 import { beginCell, storeStateInit, Address, Cell, toNano } from "@ton/core";
 import { buildNftCollectionContentCell } from "./nft.helper";
@@ -18,33 +18,31 @@ export class NftService {
     @InjectModel(NftItem.name) private readonly itemModel: Model<NftItem>,
   ) {}
 
-  async createCollection(
-    createCollectionDto: CreateNftCollectionDto,
-    user: User,
-  ) {
-    // Generate a unique hash for the collection
+  async createCollection(createCollectionDto: NftCollectionDto, user: User) {
     const hash = nanoid(16);
 
-    // Create the NFT item
-    const nftItem: Partial<NftItem> = {
-      title: createCollectionDto.itemName,
-      description: createCollectionDto.itemDescription,
-      price: createCollectionDto.itemPrice,
-    };
+    const savedNftItems = await Promise.all(
+      createCollectionDto.items.map(async (item) => {
+        const nftItem: Partial<NftItem> = {
+          name: item.name,
+          description: item.description,
+          price: item.price,
+        };
 
-    const newNftItem = new this.itemModel(nftItem);
-    // Save the NFT item to the database
-    const savedNftItem = await newNftItem.save();
+        const newNftItem = new this.itemModel(nftItem);
+        // Save the NFT item to the database
+        return await newNftItem.save();
+      }),
+    );
 
-    // Create the NFT collection
     const nftCollection: Partial<NftCollection> = {
-      title: createCollectionDto.collectionName,
-      description: createCollectionDto.collectionDescription,
+      name: createCollectionDto.name,
+      description: createCollectionDto.description,
       hash,
-      items_limit: createCollectionDto.itemsLimit,
+      itemsLimit: createCollectionDto.itemsLimit,
       owner_id: user._id,
       links: createCollectionDto.links,
-      items: [savedNftItem._id as unknown as string], // Link the saved item to the collection
+      items: savedNftItems.map((item) => item._id.toString()),
     };
 
     const newCollection = new this.collectionModel(nftCollection);

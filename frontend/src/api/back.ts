@@ -1,5 +1,5 @@
 import { config } from "~/config";
-import { NftCollectionDto } from "~/db/dto";
+import { NftCollection } from "~/db/models";
 import { CollectionFormData } from "~/pages/collections/create/zod";
 
 export const createCollection = async (data: CollectionFormData) => {
@@ -7,22 +7,29 @@ export const createCollection = async (data: CollectionFormData) => {
 
   const formData = new FormData();
 
-  if (data.collectionImage && data.collectionImage.length > 0) {
-    formData.append("collectionImage", data.collectionImage[0]); // Append the first file
+  if (data.image && data.image) {
+    formData.append("image", data.image); // Append the first file
   }
 
-  formData.append("collectionName", data.collectionName);
-  formData.append("collectionDescription", data.collectionDescription);
-  formData.append("itemsLimit", data.itemsLimit.toString());
-  formData.append("itemPrice", data.itemPrice.toString());
+  // Append collection details
+  formData.append("name", data.name);
+  formData.append("description", data.description);
+  if (data.itemsLimit) {
+    formData.append("itemsLimit", data.itemsLimit.toString());
+  }
 
+  // Append links
   data.links.forEach((link) => formData.append("links[]", link));
 
-  if (data.itemImage && data.itemImage.length > 0) {
-    formData.append("itemImage", data.itemImage[0]); // Append the first file if it exists
-  }
-  formData.append("itemName", data.itemName);
-  formData.append("itemDescription", data.itemDescription);
+  // Append items details
+  data.items.forEach((item, index) => {
+    if (item.image && item.image) {
+      formData.append(`items.image`, item.image); // Append the first file if it exists
+    }
+    formData.append(`items[${index}][name]`, item.name);
+    formData.append(`items[${index}][description]`, item.description);
+    formData.append(`items[${index}][price]`, item.price.toString());
+  });
 
   try {
     const response = await fetch(`${config.apiUrl}/api/collections/create`, {
@@ -37,15 +44,15 @@ export const createCollection = async (data: CollectionFormData) => {
       const error = await response.json();
       throw new Error(error.message);
     }
-    const data = await response.json();
-    return data;
+    const responseData = await response.json();
+    return responseData;
   } catch (error) {
-    console.error("Error fetching events", error);
+    console.error("Error creating collection", error);
     throw error;
   }
 };
 
-export const fetchCollections = async (): Promise<NftCollectionDto[]> => {
+export const fetchCollections = async (): Promise<NftCollection[]> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
     const response = await fetch(`${config.apiUrl}/api/collections`, {
@@ -61,7 +68,8 @@ export const fetchCollections = async (): Promise<NftCollectionDto[]> => {
     }
 
     const data = await response.json();
-    return data as NftCollectionDto[];
+
+    return data as NftCollection[];
   } catch (error) {
     console.error("Error in fetchCollections:", error);
     throw error;
