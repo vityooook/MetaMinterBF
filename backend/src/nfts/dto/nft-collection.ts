@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsArray,
   ValidateNested,
+  IsDateString,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { NftItemDto } from "./nft-item.dto";
@@ -31,4 +32,12 @@ export class NftCollectionDto {
   @IsOptional()
   @IsArray()
   links: string[];
+
+  @IsOptional()
+  @IsDateString()
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateTo?: string;
 }

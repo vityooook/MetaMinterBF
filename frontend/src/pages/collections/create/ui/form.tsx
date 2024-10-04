@@ -14,6 +14,7 @@ import { CollectionFormData } from "../zod";
 import { Textarea } from "~/components/ui/textarea";
 import { LinksField } from "./links-field";
 import { ImageUploadPreview } from "~/components/ui/image-uploader";
+import { useState } from "react";
 
 interface CollectionFormProps {
   formData?: CollectionFormData; // Optional prop for editing
@@ -27,6 +28,14 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   onSubmit,
   form,
 }) => {
+  const [fromDate, setFromDate] = useState<string>("");
+
+  const today = new Date().toISOString().slice(0, 16);
+
+  const handleFromDateChange = (value: string) => {
+    setFromDate(value);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -177,6 +186,53 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
             </FormItem>
           )}
         />
+
+        <FormItem>
+          <FormLabel>Date</FormLabel>
+          <div className="flex gap-2 items-center">
+            <FormField
+              control={form.control}
+              name="dateFrom"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      placeholder="Выберите начальную дату"
+                      type="datetime-local"
+                      min={today} // Disable past dates
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e); // Update react-hook-form
+                        handleFromDateChange(e.target.value); // Update fromDate state
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <span>–</span>
+
+            <FormField
+              control={form.control}
+              name="dateTo"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      type="datetime-local"
+                      placeholder="Выберите конечную дату"
+                      min={fromDate || today} // Disable dates before fromDate
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </FormItem>
 
         <footer className="pt-8">
           <Button type="submit" className="w-full" size="lg">

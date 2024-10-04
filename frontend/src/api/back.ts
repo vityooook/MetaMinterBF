@@ -23,6 +23,16 @@ export const createCollection = async (data: CollectionFormData) => {
     data.links.forEach((link) => formData.append("links[]", link));
   }
 
+  // Convert dates to UTC and append them
+  if (data.dateFrom) {
+    const fromDateUTC = new Date(data.dateFrom).toISOString();
+    formData.append("dateFrom", fromDateUTC);
+  }
+  if (data.dateTo) {
+    const toDateUTC = new Date(data.dateTo).toISOString();
+    formData.append("dateTo", toDateUTC);
+  }
+
   // Append items details
   data.items.forEach((item, index) => {
     if (item.image && item.image) {

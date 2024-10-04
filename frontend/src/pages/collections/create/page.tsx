@@ -41,6 +41,8 @@ export const CollectionCreate = () => {
       items: [],
       itemsLimit: 1,
       links: [],
+      dateFrom: "",
+      dateTo: "",
     },
   });
 

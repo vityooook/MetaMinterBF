@@ -51,6 +51,12 @@ export class NftService {
       links: createCollectionDto.links,
       items: savedNftItems.map((item) => item._id.toString()),
       imageUrl: collectionImagePath,
+      dateFrom: createCollectionDto.dateFrom
+        ? new Date(createCollectionDto.dateFrom)
+        : undefined,
+      dateTo: createCollectionDto.dateTo
+        ? new Date(createCollectionDto.dateTo)
+        : undefined,
     };
 
     const newCollection = new this.collectionModel(nftCollection);

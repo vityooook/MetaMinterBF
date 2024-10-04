@@ -48,6 +48,18 @@ export class NftCollection {
   })
   links: string[];
 
+  @Prop({
+    type: Date,
+    required: false
+  })
+  dateFrom: Date;
+
+  @Prop({
+    type: Date,
+    required: false
+  })
+  dateTo: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }
