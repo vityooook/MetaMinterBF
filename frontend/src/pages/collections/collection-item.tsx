@@ -19,7 +19,7 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
 
   return (
     <Link
-      to={`/collections/${collection.hash}`}
+      to={`/collections/${collection._id}`}
       className="block p-3 border-b border-border last:border-none"
     >
       <div className="flex gap-4 items-center collection-item">

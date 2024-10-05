@@ -4,7 +4,7 @@ import { NftCollection } from "./models";
 export interface CollectionStore {
   collections: NftCollection[];
 
-  getCollection: (collectionHash: string) => NftCollection | undefined;
+  getCollection: (collectionId: string) => NftCollection | undefined;
   setCollections: (collections: NftCollection[]) => void;
   addCollection: (newCollection: NftCollection) => void; // New method
   patchCollection: (
@@ -15,8 +15,8 @@ export interface CollectionStore {
 
 export const useCollectionStore = create<CollectionStore>((set, get) => ({
   collections: [],
-  getCollection: (collectionHash) => {
-    return get().collections.find((q) => q.hash === collectionHash);
+  getCollection: (collectionId) => {
+    return get().collections.find((q) => q._id === collectionId);
   },
 
   addCollection: (newCollection) => {

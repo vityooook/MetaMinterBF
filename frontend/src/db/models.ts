@@ -6,6 +6,7 @@ import {
 
 export type UserModel = User & {
   _id?: string;
+  isOnboarded: boolean;
 };
 
 export type NftItem = ItemFormData & {

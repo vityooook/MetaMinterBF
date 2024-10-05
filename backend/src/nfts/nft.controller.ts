@@ -62,14 +62,14 @@ export class NftController {
     );
   }
 
-  @Get(":hash")
-  async getNftCollectionByHash(@Param("hash") hash: string) {
-    return await this.nftService.findNftCollectionByHash(hash);
+  @Get(":id")
+  async getNftCollectionById(@Param("id") id: string) {
+    return await this.nftService.findNftCollectionById(id);
   }
 
-  @Get(":hash")
-  async getNftItemByHash(@Param("hash") hash: string) {
-    return await this.nftService.findNftItemByHash(hash);
+  @Get(":id")
+  async getNftItemById(@Param("id") id: string) {
+    return await this.nftService.findNftItemById(id);
   }
 
   @Get("")

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { fetchCollections } from "~/api/back";
+import { fetchCollections } from "~/api/backend";
 import { useAuthStore } from "~/db/authStore";
 import { useCollectionStore } from "~/db/collectionStore";
 

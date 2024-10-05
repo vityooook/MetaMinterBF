@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import SocialLogo from "~/components/socia-logo";
 import { useCollectionStore } from "~/db/collectionStore";
@@ -9,6 +9,10 @@ import { getImageUrl } from "~/api/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
+import { Button } from "~/components/ui/button";
+import { MinusIcon, PlusIcon, ShareIcon, XIcon } from "lucide-react";
+import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
+import { Input } from "~/components/ui/input";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -19,7 +23,7 @@ export function generateShareUrl(text: string = "", id: string): string {
   return `https://t.me/share/url?text=${encodedText}&url=${encodedUrl}`;
 }
 
-export const CollectionViewPage: React.FC = () => {
+export const CollectionMintPage: React.FC = () => {
   useBack("/");
   const { collectionId } = useParams<{ collectionId: string }>();
   const collection = useCollectionStore((state) =>
@@ -29,35 +33,56 @@ export const CollectionViewPage: React.FC = () => {
   const mb = useMainButton();
   const navigate = useNavigate();
   const utils = useUtils();
+  const userAddress = useTonAddress();
+  const [value, setValue] = useState(1);
+  const tonPrice = 6;
 
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
   }, [utils, collection]);
 
-  const handlePublish = useCallback(() => {}, [utils, collection]);
+  const handleBuy = useCallback(() => {
+    navigate(`/collections/${collectionId}/minted`)
+  }, [utils, collection]);
 
   useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");
   }, [miniApp]);
 
   useEffect(() => {
-    mb.show().enable();
+    if (userAddress) {
+      mb.show().enable();
 
-    if (collection?.deployed) {
-      mb.setText("Share").on("click", handleShare);
-    } else {
-      mb.setText("Publish").on("click", handlePublish);
+      if (collection?.deployed) {
+        mb.setText("Mint NFT").on("click", handleBuy);
+      }
     }
 
     return () => {
-      mb.hide().off("click", handleShare);
-      mb.off("click", handlePublish);
+      mb.hide().off("click", handleBuy);
     };
-  }, [mb, collection, navigate, handleShare, handlePublish]);
+  }, [mb, collection, userAddress, navigate, handleShare]);
 
   return (
     collection && (
-      <div className="-mt-4 -mx-4">
+      <div className="-my-4 -mx-4 relative min-h-dvh flex flex-col">
+        <Button
+          onClick={handleShare}
+          size="icon"
+          variant="ghost"
+          className="absolute top-4 left-4 bg-black"
+        >
+          <ShareIcon className="w-5 h-5" />
+        </Button>
+        <Button
+          onClick={() => navigate("/")}
+          size="icon"
+          variant="ghost"
+          className="absolute top-4 right-4 bg-black"
+        >
+          <XIcon className="w-5 h-5" />
+        </Button>
+
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
           <div className="relative">
             {collection.imageUrl && (
@@ -118,6 +143,42 @@ export const CollectionViewPage: React.FC = () => {
             </div>
           </Card>
         </section>
+        {userAddress && (
+          <div className="flex px-20">
+            <Button
+              onClick={() => setValue(Number(value) - 1)}
+              size="icon"
+              variant="ghost"
+              className=" bg-black min-w-10 mt-16"
+            >
+              <MinusIcon className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center flex-col gap-1">
+              <Input
+                onChange={(e) => setValue(e.target.value as any)}
+                value={value}
+                className="bg-transparent border-none text-4xl text-center"
+              />
+              <span className="text-muted-foreground">{tonPrice * value} TON</span>
+            </div>
+            <Button
+              onClick={() => setValue(Number(value) + 1)}
+              size="icon"
+              variant="ghost"
+              className=" bg-black min-w-10 mt-16"
+            >
+              <PlusIcon className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
+        {!userAddress && (
+          <section className="flex flex-col text-center items-center gap-4 mt-auto pb-16">
+            <p className="text-muted-foreground text-sm px-24">
+              To make a purchase, you need to connect a TON wallet.
+            </p>
+            <TonConnectButton />
+          </section>
+        )}
       </div>
     )
   );

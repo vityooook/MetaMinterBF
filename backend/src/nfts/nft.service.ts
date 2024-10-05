@@ -23,7 +23,6 @@ export class NftService {
     files: { [key: string]: Express.Multer.File[] },
     user: User,
   ) {
-    const hash = nanoid(16);
 
     const savedNftItems = await Promise.all(
       createCollectionDto.items.map(async (item, index) => {
@@ -45,7 +44,6 @@ export class NftService {
     const nftCollection: Partial<NftCollection> = {
       name: createCollectionDto.name,
       description: createCollectionDto.description,
-      hash,
       itemsLimit: createCollectionDto.itemsLimit,
       owner_id: user._id,
       links: createCollectionDto.links,
@@ -65,7 +63,6 @@ export class NftService {
 
     const response = {
       ...nftCollection,
-      hash,
       deployed: true,
       items: savedNftItems.map((item) => ({
         _id: item._id.toString(),
@@ -79,16 +76,16 @@ export class NftService {
     return response;
   }
 
-  async findNftCollectionByHash(hash: string) {
-    const collection = await this.collectionModel.findOne({ hash });
+  async findNftCollectionById(id: string) {
+    const collection = await this.collectionModel.findOne({ _id: id });
     if (!collection || !collection.deployed) {
       throw new NotFoundException("Collection not found");
     }
     return collection;
   }
 
-  async findNftItemByHash(hash: string) {
-    const nft = await this.itemModel.findOne({ hash });
+  async findNftItemById(id: string) {
+    const nft = await this.itemModel.findOne({ _id: id });
     return nft;
   }
 

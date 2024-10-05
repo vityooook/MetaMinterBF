@@ -1,6 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -233,12 +232,6 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
             />
           </div>
         </FormItem>
-
-        <footer className="pt-8">
-          <Button type="submit" className="w-full" size="lg">
-            Добавить коллекцию
-          </Button>
-        </footer>
       </form>
     </Form>
   );

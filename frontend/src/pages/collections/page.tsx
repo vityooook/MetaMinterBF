@@ -1,15 +1,32 @@
 import { useCollectionStore } from "~/db/collectionStore";
-import { Button } from "~/components/ui/button";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useUserStore } from "~/db/userStore";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { Card } from "~/components/ui/card";
 import { CollectionItem } from "./collection-item";
+import { useCallback, useEffect } from "react";
+import { useBackButton, useMainButton } from "@telegram-apps/sdk-react";
 
 export const CollectionPage: React.FC = () => {
   const toncoinPrice = 6;
   const user = useUserStore((state) => state.user);
   const collections = useCollectionStore((state) => state.collections);
+  const bb = useBackButton();
+  const mb = useMainButton();
+  const navigate = useNavigate();
+
+  const handleClick = useCallback(() => {
+    navigate("/collections/create");
+  }, [navigate]);
+
+  useEffect(() => {
+    mb.show().enable().setText("Create Collection").on("click", handleClick);
+    bb.hide();
+
+    return () => {
+      mb.hide().off("click", handleClick);
+    };
+  }, [mb, bb]);
 
   return (
     <>
@@ -26,17 +43,14 @@ export const CollectionPage: React.FC = () => {
           <TonConnectButton />
         </div>
       </header>
-      <Button className="w-full" size="lg" asChild>
-        <Link to="/collections/create">Create Collection</Link>
-      </Button>
       {collections && collections.length === 0 ? (
         <div className="flex justify-center items-center h-[calc(100vh-220px)] text-gray-500">
           No collections found
         </div>
       ) : (
         <>
-          <div className="text-lg font-semibold mt-6 mb-2">
-            Created Collections
+          <div className="text-lg font-semibold mb-2">
+            My collections
           </div>
           <Card>
             {collections?.map((collection, index) => (
