@@ -14,7 +14,6 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   value,
   onChange,
   accept = ".jpg,.jpeg,.png,.webp,.gif,.svg",
-  resolution = { width: 512, height: 512 },
   ...rest
 }) => {
   const [preview, setPreview] = useState<string | null>(
@@ -34,35 +33,9 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
     return allowedTypesArray.some((type) => type.includes(fileExtension));
   };
 
-  const validateImageResolution = (file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
-      img.src = objectUrl;
-
-      img.onload = () => {
-        const isValidResolution =
-          img.width === resolution.width && img.height === resolution.height;
-
-        URL.revokeObjectURL(objectUrl);
-        resolve(isValidResolution);
-      };
-    });
-  };
-
   const handleImageUpload = async (file: File) => {
     if (!isFileTypeAllowed(file)) {
       triggerError("Invalid file type");
-      triggerShakeAnimation();
-      return;
-    }
-
-    const isResolutionValid = await validateImageResolution(file);
-
-    if (!isResolutionValid) {
-      triggerError(
-        `Image resolution must be ${resolution.width}x${resolution.height}`
-      );
       triggerShakeAnimation();
       return;
     }
@@ -161,11 +134,6 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
       {showDescription && (
         <FormDescription className="space-x-2">
           {accept && <span>{accept.replace(/\./g, " ").toUpperCase()}</span>}
-          {resolution && (
-            <span>
-              {resolution.width}x{resolution.height}px
-            </span>
-          )}
         </FormDescription>
       )}
     </div>

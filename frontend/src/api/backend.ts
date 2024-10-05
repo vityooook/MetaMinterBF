@@ -87,3 +87,32 @@ export const fetchCollections = async (): Promise<NftCollection[]> => {
     throw error;
   }
 };
+
+export const fetchCollectionById = async (
+  collectionId: string
+): Promise<NftCollection> => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    const response = await fetch(
+      `${config.apiUrl}/api/collection/${collectionId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+
+    return data as NftCollection;
+  } catch (error) {
+    console.error("Error in fetchCollections:", error);
+    throw error;
+  }
+};

@@ -15,9 +15,9 @@ export const Root = () => {
   return (
     <BrowserRouter>
       <TonConnectUIProvider
-        manifestUrl={`https://tmadevs.com/tonconnect-manifest.json`}
+        manifestUrl={`https://app.metaminter.tmadevs.com/tonconnect-manifest.json`}
         actionsConfiguration={{
-          twaReturnUrl: `https://t.me/${config.botName}/onboarding`,
+          twaReturnUrl: `https://t.me/${config.botName}/app`,
         }}
       >
         <ThemeProvider defaultTheme="dark" storageKey="shadcn-ui-theme">

@@ -66,12 +66,7 @@ export class NftController {
   async getNftCollectionById(@Param("id") id: string) {
     return await this.nftService.findNftCollectionById(id);
   }
-
-  @Get(":id")
-  async getNftItemById(@Param("id") id: string) {
-    return await this.nftService.findNftItemById(id);
-  }
-
+  
   @Get("")
   async findUserCollections(@CurrentUser() currentUser) {
     return await this.nftService.findUserCollections(currentUser);

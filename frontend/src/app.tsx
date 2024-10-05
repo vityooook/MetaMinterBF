@@ -17,10 +17,12 @@ import { CollectionCreatePage } from "./pages/collections/create/page";
 import { CollectionMintPage } from "./pages/collections/mint/page";
 import { CollectionViewPage } from "./pages/collections/view/page";
 import { CollectionMintedPage } from "./pages/collections/mint/minted/page";
+import { useReroute } from "./hooks/useReroute";
 
 function App() {
   useAuth();
   useCollections();
+  useReroute();
 
   const theme = useTheme();
   const themeParams = useThemeParams();

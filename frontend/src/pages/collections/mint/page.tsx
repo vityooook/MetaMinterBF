@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import SocialLogo from "~/components/socia-logo";
-import { useCollectionStore } from "~/db/collectionStore";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { minifyAddress } from "~/lib/utils";
@@ -13,11 +12,13 @@ import { Button } from "~/components/ui/button";
 import { MinusIcon, PlusIcon, ShareIcon, XIcon } from "lucide-react";
 import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
 import { Input } from "~/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCollectionById } from "~/api/backend";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
   const encodedUrl = encodeURIComponent(
-    `https://t.me/${config.botName}/mint?startapp=nft-${id.toString()}`
+    `https://t.me/${config.botName}/app?startapp=nft-${id.toString()}`
   );
 
   return `https://t.me/share/url?text=${encodedText}&url=${encodedUrl}`;
@@ -26,9 +27,14 @@ export function generateShareUrl(text: string = "", id: string): string {
 export const CollectionMintPage: React.FC = () => {
   useBack("/");
   const { collectionId } = useParams<{ collectionId: string }>();
-  const collection = useCollectionStore((state) =>
-    state.getCollection(collectionId!)
-  );
+
+  const {data: collection} = useQuery({
+    queryKey: ['collections', collectionId],
+    queryFn: async () => {
+      return await fetchCollectionById(collectionId!);
+    },
+    enabled: !!collectionId
+  })
   const miniApp = useMiniApp();
   const mb = useMainButton();
   const navigate = useNavigate();
