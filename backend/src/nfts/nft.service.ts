@@ -7,7 +7,6 @@ import { NftCollectionDto } from "./dto/nft-collection";
 import { NftItem } from "./entities/nft-item.entity";
 import { beginCell, storeStateInit, Address, Cell, toNano } from "@ton/core";
 import { buildNftCollectionContentCell } from "./nft.helper";
-import { nanoid } from "nanoid";
 
 @Injectable()
 export class NftService {
