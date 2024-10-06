@@ -1,4 +1,5 @@
 import { config } from "~/config";
+import { generateCollectionPayloadDto } from "~/db/dto";
 import { NftCollection } from "~/db/models";
 import { CollectionFormData } from "~/pages/collections/create/zod";
 
@@ -117,21 +118,19 @@ export const fetchCollectionById = async (
   }
 };
 
-export const publishCollection = async (
-    collectionId: string
+export const generateCollectionPayload = async (
+  data: generateCollectionPayloadDto
 ): Promise<any> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
-    const response = await fetch(
-        `${config.apiUrl}/api/collection/${collectionId}/publish`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-    );
+    const response = await fetch(`${config.apiUrl}/api/collection/generate-payload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
 
     if (!response.ok) {
       throw new Error("Network response was not ok");
