@@ -12,23 +12,16 @@ import {
 import { NftService } from "./nft.service";
 import { NftCollectionDto } from "./dto/nft-collection";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
-import { FileService } from "src/file/file.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
-import {
-  editFileName,
-  imageFileFilter,
-} from "src/file/utils/file-upload.utils";
+import { editFileName, imageFileFilter } from "./nft.utils";
 import { JwtAuthGuard } from "src/auth/auth.guard";
 import { PublishDto } from "./dto/publish.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller("api/collections")
 export class NftController {
-  constructor(
-    private readonly nftService: NftService,
-    private readonly fileService: FileService,
-  ) {}
+  constructor(private readonly nftService: NftService) {}
 
   @Post("/create")
   @UseInterceptors(
@@ -64,17 +57,12 @@ export class NftController {
     );
   }
 
-  @Post("/generate-payload")
-  async generateCollectionPayload(@Body() data: PublishDto) {
-    return await this.nftService.generateCollectionPayload(
-      data.collectionId,
-      data.userAddress,
-    );
-  }
-
   @Post("/publish")
   async publishCollection(@Body() data: PublishDto) {
-    return await this.nftService.publishCollection(data.collectionId);
+    return await this.nftService.publishCollection(
+      data.collectionId,
+      data.collectionAddress,
+    );
   }
 
   @Get(":id")

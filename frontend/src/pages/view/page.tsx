@@ -9,21 +9,11 @@ import { getImageUrl } from "~/api/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
-import {
-  ActionConfiguration,
-  useTonAddress,
-  useTonConnectUI,
-} from "@tonconnect/ui-react";
+import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { toast } from "~/components/ui/use-toast.ts";
 
 import { usePublishMutation } from "./use-publish-mutation.tsx";
-import { useGeneratePayloadMutation } from "./use-generate-payload.tsx";
-
-export const tonConnectOptions: ActionConfiguration = {
-  modals: [],
-  notifications: [],
-  twaReturnUrl: "https://t.me/MetaMinterBot/app",
-};
+import { SDK } from "~/api/sdk.ts";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -46,8 +36,8 @@ export const CollectionViewPage: React.FC = () => {
   const utils = useUtils();
   const [tonConnect] = useTonConnectUI();
   const userAddress = useTonAddress();
+  const sdk = new SDK();
 
-  const generatePaylaod = useGeneratePayloadMutation();
   const publishCollection = usePublishMutation();
 
   const handleShare = useCallback(() => {
@@ -55,33 +45,28 @@ export const CollectionViewPage: React.FC = () => {
   }, [utils, collection]);
 
   const handlePublish = useCallback(async () => {
-    if (!collection?._id) return;
+    if (!collection?._id || collection.items.length === 0) return;
 
     if (!userAddress) {
       return tonConnect.openModal();
     }
 
-    const payload = await generatePaylaod.mutateAsync({
-      collectionId: collection?._id,
-      userAddress: userAddress,
-    });
-
     try {
-      await tonConnect.sendTransaction(
-        {
-          validUntil: Math.floor(Date.now() / 1000) + 90,
-          messages: [
-            {
-              address: payload.address,
-              amount: payload.amount,
-              stateInit: payload.stateInit,
-            },
-          ],
-        },
-        tonConnectOptions
-      );
+      const payload = await sdk.publishCollection({
+        tonConnect,
+        userAddress,
+        collectionId: collection._id,
+        itemId: collection.items[0]._id!,
+        price: collection.items[0].price,
+        limit: collection.itemsLimit,
+        startTime: collection.startTime,
+        endTime: collection.endTime,
+      });
 
-      publishCollection.mutate(collection?._id);
+      publishCollection.mutate({
+        collectionId: collection?._id,
+        collectionAddress: payload.address.toString(),
+      });
     } catch (e) {
       console.log(e);
       toast({

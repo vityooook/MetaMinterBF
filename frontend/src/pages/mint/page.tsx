@@ -19,17 +19,8 @@ import { Input } from "~/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCollectionById } from "~/api/backend";
 import { Footer } from "~/components/footer";
-import { tonConnectOptions } from "../view/page";
-import { beginCell, toNano } from "@ton/core";
 import { toast } from "~/components/ui/use-toast";
-
-const createBodyMessage = (quantity: number) => {
-  return beginCell()
-    .storeUint(1, 32)
-    .storeUint(0, 64)
-    .storeUint(quantity, 32)
-    .endCell();
-};
+import { SDK } from "~/api/sdk";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -56,8 +47,9 @@ export const CollectionMintPage: React.FC = () => {
   const navigate = useNavigate();
   const utils = useUtils();
   const userAddress = useTonAddress();
-  const [value, setValue] = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [tonConnect] = useTonConnectUI();
+  const sdk = new SDK();
 
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
@@ -68,8 +60,6 @@ export const CollectionMintPage: React.FC = () => {
       tonConnect.openModal();
     }
 
-    const body = createBodyMessage(value);
-
     if (!collection?.address) {
       toast({
         variant: "destructive",
@@ -77,21 +67,19 @@ export const CollectionMintPage: React.FC = () => {
       });
     }
 
-    await tonConnect.sendTransaction(
-      {
-        validUntil: Math.floor(Date.now() / 1000) + 90,
-        messages: [
-          {
-            address: collection?.address!,
-            amount: toNano(collection?.items[0].price! * value).toString(),
-            payload: body.toBoc().toString("base64"),
-          },
-        ],
-      },
-      tonConnectOptions
-    );
+    try {
+      await sdk.mintNft({
+        tonConnect,
+        userAddress,
+        collectionAddress: collection?.address!,
+        quantity,
+        price: collection?.items[0].price!,
+      });
 
-    navigate(`/collections/${collectionId}/minted`);
+      navigate(`/collections/${collectionId}/minted`);
+    } catch (e) {
+      console.log(e);
+    }
   }, [utils, collection]);
 
   useEffect(() => {
@@ -195,7 +183,7 @@ export const CollectionMintPage: React.FC = () => {
         {userAddress && (
           <div className="flex items-center px-20">
             <Button
-              onClick={() => setValue(Number(value) - 1)}
+              onClick={() => setQuantity(Number(quantity) - 1)}
               size="icon"
               variant="ghost"
               className=" bg-card min-w-10"
@@ -204,16 +192,16 @@ export const CollectionMintPage: React.FC = () => {
             </Button>
             <div className="flex items-center flex-col gap-1">
               <Input
-                onChange={(e) => setValue(e.target.value as any)}
-                value={value}
+                onChange={(e) => setQuantity(e.target.value as any)}
+                value={quantity}
                 className="bg-transparent border-none text-4xl text-center"
               />
               <span className="text-muted-foreground">
-                {collection.items[0].price * value} TON
+                {collection.items[0].price * quantity} TON
               </span>
             </div>
             <Button
-              onClick={() => setValue(Number(value) + 1)}
+              onClick={() => setQuantity(Number(quantity) + 1)}
               size="icon"
               variant="ghost"
               className=" bg-card min-w-10"

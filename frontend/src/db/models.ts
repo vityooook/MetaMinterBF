@@ -2,7 +2,7 @@ import { User } from "@telegram-apps/sdk-react";
 import {
   CollectionFormData,
   ItemFormData,
-} from "~/pages/collections/create/zod";
+} from "~/pages/create/zod";
 
 export type UserModel = User & {
   _id?: string;
@@ -10,6 +10,7 @@ export type UserModel = User & {
 };
 
 export type NftItem = ItemFormData & {
+  _id?: string;
   imageUrl: string;
 };
 

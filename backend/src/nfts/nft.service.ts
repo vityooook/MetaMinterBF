@@ -6,7 +6,6 @@ import { User } from "../users/entities/user.entity";
 import { NftCollectionDto } from "./dto/nft-collection";
 import { NftItem } from "./entities/nft-item.entity";
 import { toNano, address } from "@ton/core";
-import { generateNftCollectionPayload } from "./nft.helper";
 import {
   MASTER_ADDRESS,
   NFT_COLLECTION_CODE_HEX,
@@ -84,7 +83,9 @@ export class NftService {
   }
 
   async findNftCollectionById(id: string) {
-    const collection = await this.collectionModel.findOne({ _id: id }).populate('items');
+    const collection = await this.collectionModel
+      .findOne({ _id: id })
+      .populate("items");
     return collection;
   }
 
@@ -103,55 +104,15 @@ export class NftService {
       .exec();
   }
 
-  async generateCollectionPayload(collectionId: string, userAddress: string) {
-    const collection = await this.findNftCollectionById(collectionId);
-    if (!collection) {
-      throw new Error("Collection not found");
-    }
-
-    const item = await this.findNftItemById(collection.items[0]);
-    if (!item) {
-      throw new Error("NFT item not found in the collection");
-    }
-
-    const payload = await generateNftCollectionPayload({
-      nftCollectionCodeHex: NFT_COLLECTION_CODE_HEX,
-      nftItemCodeHex: NFT_ITEM_CODE_HEX,
-      admin: address(MASTER_ADDRESS),
-      userOwner: address(userAddress),
-      price: toNano(item.price),
-      buyerLimit: collection.itemsLimit,
-      startTime: Math.floor(Number(collection.startTime) / 1000),
-      endTime: Math.floor(Number(collection.endTime) / 1000),
-      collectionContent: `${process.env.APP_URL}/api/metadata/collection/${collection._id}.json`,
-      itemContent: `${process.env.APP_URL}/api/metadata/nft/`,
-      itemContentJson: `${item._id}.json`,
-      commission: NFT_COMMISSION,
-    });
-
-    const collectionAddress = payload.address.toString();
-
-    await this.collectionModel.updateOne(
-      { _id: collectionId },
-      { $set: { address: collectionAddress } },
-    );
-
-    return {
-      stateInit: payload.stateInitBase64,
-      address: collectionAddress,
-      amount: Number(NFT_COMMISSION),
-    };
-  }
-
-  async publishCollection(collectionId: string) {
-    const collection = await this.findNftCollectionById(collectionId);
+  async publishCollection(id: string, address: string) {
+    const collection = await this.findNftCollectionById(id);
     if (!collection) {
       throw new Error("Collection not found");
     }
 
     return await this.collectionModel.updateOne(
-      { _id: collectionId },
-      { $set: { deployed: true } },
+      { _id: id },
+      { $set: { deployed: true, address } },
     );
   }
 

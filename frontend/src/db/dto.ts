@@ -1,4 +1,4 @@
-export type generateCollectionPayloadDto = {
+export type PublishCollectionDto = {
   collectionId: string;
-  userAddress: string;
+  collectionAddress: string;
 };

@@ -13,10 +13,10 @@ import { useTheme } from "./providers/shadcn-provider";
 import { WelcomePage } from "./pages/welcome/page";
 import { CollectionPage } from "./pages/collections/page";
 import { useCollections } from "./hooks/useCollections";
-import { CollectionCreatePage } from "./pages/collections/create/page";
-import { CollectionMintPage } from "./pages/collections/mint/page";
-import { CollectionViewPage } from "./pages/collections/view/page";
-import { CollectionMintedPage } from "./pages/collections/mint/minted/page";
+import { CollectionCreatePage } from "./pages/create/page";
+import { CollectionMintPage } from "./pages/mint/page";
+import { CollectionViewPage } from "./pages/view/page";
+import { CollectionMintedPage } from "./pages/mint/minted/page";
 import { useReroute } from "./hooks/useReroute";
 import { useWalletAuth } from "~/hooks/useWalletAuth.tsx";
 

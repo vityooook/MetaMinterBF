@@ -1,7 +1,7 @@
 import { config } from "~/config";
-import { generateCollectionPayloadDto } from "~/db/dto";
+import { PublishCollectionDto } from "~/db/dto";
 import { NftCollection } from "~/db/models";
-import { CollectionFormData } from "~/pages/collections/create/zod";
+import { CollectionFormData } from "~/pages/create/zod";
 
 export const createCollection = async (data: CollectionFormData) => {
   const accessToken = localStorage.getItem("accessToken");
@@ -26,9 +26,9 @@ export const createCollection = async (data: CollectionFormData) => {
 
   // Convert dates to UTC and append them
   if (data.startTime) {
-    console.log()
+    console.log();
     const fromDateUTC = new Date(data.startTime).getTime();
-    console.log(fromDateUTC)
+    console.log(fromDateUTC);
     formData.append("startTime", fromDateUTC.toString());
   }
   if (data.endTime) {
@@ -120,8 +120,8 @@ export const fetchCollectionById = async (
   }
 };
 
-export const generateCollectionPayload = async (
-  data: generateCollectionPayloadDto
+export const publishCollection = async (
+  data: PublishCollectionDto
 ): Promise<any> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
@@ -134,32 +134,6 @@ export const generateCollectionPayload = async (
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(data),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error in fetchCollections:", error);
-    throw error;
-  }
-};
-
-export const publishCollection = async (collectionId: string): Promise<any> => {
-  try {
-    const accessToken = localStorage.getItem("accessToken");
-    const response = await fetch(
-      `${config.apiUrl}/api/collections/generate-payload`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(collectionId),
       }
     );
 

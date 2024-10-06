@@ -7,5 +7,5 @@ export class PublishDto {
 
   @IsNotEmpty()
   @IsString()
-  userAddress: string;
+  collectionAddress: string;
 }
