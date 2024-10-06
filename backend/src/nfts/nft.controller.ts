@@ -21,7 +21,7 @@ import {
   imageFileFilter,
 } from "src/file/utils/file-upload.utils";
 
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller("api/collections")
 export class NftController {
   constructor(
@@ -73,8 +73,21 @@ export class NftController {
     return await this.nftService.findUserCollections(currentUser);
   }
 
-  @Post("publish")
+  @Post("/publish")
   async publishCollection() {
-    return await this.nftService.publishCollection();
+    return await this.nftService.generateCollectionPayload(
+      "66fb036da83ae68413205344",
+      "0QC1xFj48WvQISDIP7zwrgj1DOwmKusRCL4JDGhwkwZL1Tmk",
+    );
+  }
+
+  @Get("/metadata/collection/:id/json")
+  async getCollectionMetadata(@Param("id") id: string) {
+    return await this.nftService.collectionMetadataJson(id);
+  }
+
+  @Get("/metadata/nft/:id/json")
+  async nftMetadataJson(@Param("id") id: string) {
+    return await this.nftService.nftMetadataJson(id);
   }
 }
