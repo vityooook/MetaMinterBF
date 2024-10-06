@@ -35,9 +35,9 @@ export class NftCollectionDto {
 
   @IsOptional()
   @IsDateString()
-  dateFrom?: string;
+  startTime?: string;
 
   @IsOptional()
   @IsDateString()
-  dateTo?: string;
+  endTime?: string;
 }

@@ -8,8 +8,7 @@ export const usePublishMutation = () => {
     onError: () => {
       toast({
         title: "Error",
-        description:
-          "Failed to load prices after several attempts. Please try again later.",
+        description: "Failed to publish collection",
         variant: "destructive",
       });
     },

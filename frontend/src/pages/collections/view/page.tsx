@@ -52,8 +52,11 @@ export const CollectionViewPage: React.FC = () => {
 
   const handlePublish = useCallback(async () => {
     if (!collection?._id) return;
+    if(!userAddress) {
+      return tonConnect.openModal();
+    }
 
-    const { init } = await publishCollection.mutateAsync({
+    const response = await publishCollection.mutateAsync({
       collectionId: collection?._id,
       userAddress: userAddress,
     });
@@ -61,7 +64,11 @@ export const CollectionViewPage: React.FC = () => {
     tonConnect.sendTransaction(
       {
         validUntil: Math.floor(Date.now() / 1000) + 90,
-        messages: response?.messages,
+        messages: [{
+          address: response.address,
+          amount: response.amount,
+          stateInit: response.stateInit,
+        }],
       },
       tonConnectOptions
     );

@@ -36,6 +36,7 @@ export const CollectionCreatePage = () => {
   });
 
   const handleSubmit: SubmitHandler<CollectionFormData> = async (formData) => {
+    console.log(formData)
     mutation.mutate(formData);
   };
 
@@ -47,8 +48,8 @@ export const CollectionCreatePage = () => {
       items: [],
       itemsLimit: 1,
       links: [],
-      dateFrom: "",
-      dateTo: "",
+      startTime: "",
+      endTime: "",
     },
   });
 

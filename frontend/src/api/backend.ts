@@ -25,13 +25,15 @@ export const createCollection = async (data: CollectionFormData) => {
   }
 
   // Convert dates to UTC and append them
-  if (data.dateFrom) {
-    const fromDateUTC = new Date(data.dateFrom).toISOString();
-    formData.append("dateFrom", fromDateUTC);
+  if (data.startTime) {
+    console.log()
+    const fromDateUTC = new Date(data.startTime).getTime();
+    console.log(fromDateUTC)
+    formData.append("startTime", fromDateUTC.toString());
   }
-  if (data.dateTo) {
-    const toDateUTC = new Date(data.dateTo).toISOString();
-    formData.append("dateTo", toDateUTC);
+  if (data.endTime) {
+    const toDateUTC = new Date(data.endTime).getTime();
+    formData.append("endTime", toDateUTC.toString());
   }
 
   // Append items details
@@ -95,7 +97,7 @@ export const fetchCollectionById = async (
   try {
     const accessToken = localStorage.getItem("accessToken");
     const response = await fetch(
-      `${config.apiUrl}/api/collection/${collectionId}`,
+      `${config.apiUrl}/api/collections/${collectionId}`,
       {
         method: "GET",
         headers: {
@@ -123,14 +125,17 @@ export const generateCollectionPayload = async (
 ): Promise<any> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
-    const response = await fetch(`${config.apiUrl}/api/collection/generate-payload`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `${config.apiUrl}/api/collections/generate-payload`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Network response was not ok");

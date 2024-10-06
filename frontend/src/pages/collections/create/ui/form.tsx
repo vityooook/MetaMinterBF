@@ -191,7 +191,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
           <div className="flex gap-2 items-center">
             <FormField
               control={form.control}
-              name="dateFrom"
+              name="startTime"
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
@@ -215,7 +215,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
 
             <FormField
               control={form.control}
-              name="dateTo"
+              name="endTime"
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>

@@ -4,14 +4,13 @@ import {
   Body,
   Param,
   Get,
-  UseGuards,
   UseInterceptors,
   UploadedFiles,
+  Res,
+  UseGuards,
 } from "@nestjs/common";
-import { JwtAuthGuard } from "../auth/auth.guard";
 import { NftService } from "./nft.service";
 import { NftCollectionDto } from "./dto/nft-collection";
-import { PublishDto } from "./dto/publish.dto";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { FileService } from "src/file/file.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
@@ -20,8 +19,10 @@ import {
   editFileName,
   imageFileFilter,
 } from "src/file/utils/file-upload.utils";
+import { JwtAuthGuard } from "src/auth/auth.guard";
+import { PublishDto } from "./dto/publish.dto";
 
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller("api/collections")
 export class NftController {
   constructor(
@@ -73,21 +74,11 @@ export class NftController {
     return await this.nftService.findUserCollections(currentUser);
   }
 
-  @Post("/publish")
-  async publishCollection() {
+  @Post("/generate-payload")
+  async publishCollection(@Body() data: PublishDto) {
     return await this.nftService.generateCollectionPayload(
-      "66fb036da83ae68413205344",
-      "0QC1xFj48WvQISDIP7zwrgj1DOwmKusRCL4JDGhwkwZL1Tmk",
+      data.collectionId,
+      data.userAddress,
     );
-  }
-
-  @Get("/metadata/collection/:id/json")
-  async getCollectionMetadata(@Param("id") id: string) {
-    return await this.nftService.collectionMetadataJson(id);
-  }
-
-  @Get("/metadata/nft/:id/json")
-  async nftMetadataJson(@Param("id") id: string) {
-    return await this.nftService.nftMetadataJson(id);
   }
 }

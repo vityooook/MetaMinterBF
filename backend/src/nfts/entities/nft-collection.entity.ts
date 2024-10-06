@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, SchemaTypes } from "mongoose";
 
 export type NftCollectionDocument = NftCollection & Document;
 
@@ -9,9 +9,9 @@ export class NftCollection {
 
   @Prop({
     type: SchemaTypes.ObjectId,
-    ref: 'User',
+    ref: "User",
   })
-  owner_id: string;
+  ownerId: string;
 
   @Prop({ required: false })
   hash: string;
@@ -38,7 +38,7 @@ export class NftCollection {
   itemsLimit: number;
 
   @Prop({
-    type: [{ type: SchemaTypes.ObjectId, ref: 'NftItem', default: [] }],
+    type: [{ type: SchemaTypes.ObjectId, ref: "NftItem", default: [] }],
     required: false,
   })
   items: string[];
@@ -49,16 +49,16 @@ export class NftCollection {
   links: string[];
 
   @Prop({
-    type: Date,
-    required: false
+    type: String,
+    required: false,
   })
-  dateFrom: Date;
+  startTime: string;
 
   @Prop({
-    type: Date,
-    required: false
+    type: String,
+    required: false,
   })
-  dateTo: Date;
+  endTime: string;
 
   createdAt: Date;
   updatedAt: Date;

@@ -15,6 +15,10 @@ import {
 } from "nestjs-i18n";
 import { join } from "path";
 import { ServeStaticModule } from "@nestjs/serve-static";
+import { NftService } from "./nfts/nft.service";
+import { MongooseModule } from "@nestjs/mongoose";
+import { NftCollection, NftCollectionSchema } from "./nfts/entities/nft-collection.entity";
+import { NftItem } from "./nfts/entities/nft-item.entity";
 
 @Module({
   imports: [
@@ -40,6 +44,12 @@ import { ServeStaticModule } from "@nestjs/serve-static";
       rootPath: join(__dirname, "..", "assets"), // Path to the directory containing your images
       serveRoot: "/assets/", // URL prefix to access these files
     }),
+    MongooseModule.forFeature([
+      { name: NftCollection.name, schema: NftCollectionSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: NftItem.name, schema: NftItem },
+    ])
   ],
   controllers: [AppController],
   providers: [AppService],

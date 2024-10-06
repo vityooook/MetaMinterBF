@@ -19,8 +19,8 @@ export const collectionSchema = z.object({
     .optional(),
   links: z.array(z.string().url("Invalid URL")).optional(),
   items: z.array(itemSchema).min(1, "At least one item is required"), // Require at least one item
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
 });
 
 export type CollectionFormData = z.infer<typeof collectionSchema>;

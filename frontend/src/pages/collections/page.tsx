@@ -42,7 +42,7 @@ export const CollectionPage: React.FC = () => {
           </div>
         </div>
       </header>
-      <Button size="lg" onClick={handleClick} className="w-full">
+      <Button size="lg" onClick={handleClick} className="w-full mb-8">
         Create Collection
       </Button>
       {collections && collections.length === 0 ? (

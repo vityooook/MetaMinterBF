@@ -24,5 +24,6 @@ import { FileModule } from 'src/file/file.module';
   ],
   controllers: [NftController],
   providers: [BotService, NftService],
+  exports: [NftService]
 })
 export class NftModule {}
