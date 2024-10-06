@@ -51,20 +51,31 @@ export class SDK implements ISDK {
       .endCell();
   }
 
-  async mintNft({ tonConnect, collectionAddress, price, quantity }: MintNftData) {
-    await tonConnect.sendTransaction(
-      {
-        validUntil: Math.floor(Date.now() / 1000) + 90,
-        messages: [
-          {
-            address: collectionAddress,
-            amount: toNano(price * quantity).toString(),
-            payload: this.createBodyMessage(quantity).toBoc().toString("base64"),
-          },
-        ],
-      },
-      tonConnectOptions
-    );
+  async mintNft({
+    tonConnect,
+    collectionAddress,
+    price,
+    quantity,
+  }: MintNftData) {
+    try {
+      return await tonConnect.sendTransaction(
+        {
+          validUntil: Math.floor(Date.now() / 1000) + 90,
+          messages: [
+            {
+              address: collectionAddress,
+              amount: toNano(price * quantity).toString(),
+              payload: this.createBodyMessage(quantity)
+                .toBoc()
+                .toString("base64"),
+            },
+          ],
+        },
+        tonConnectOptions
+      );
+    } catch (e) {
+      throw new Error("Cannot mint nft in TON");
+    }
   }
 
   async publishCollection({
@@ -109,7 +120,7 @@ export class SDK implements ISDK {
 
       return payload;
     } catch (e) {
-      throw new Error("Some Error occured");
+      throw new Error("Cannot publish collection in TON");
     }
   }
 }

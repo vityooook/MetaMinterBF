@@ -5,7 +5,7 @@ import { useCollectionStore } from "~/db/collectionStore";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { minifyAddress } from "~/lib/utils";
-import { getImageUrl } from "~/api/utils";
+import { getImageUrl } from "~/api/storage.ts";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";

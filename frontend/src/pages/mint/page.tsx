@@ -4,7 +4,7 @@ import SocialLogo from "~/components/socia-logo";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { minifyAddress } from "~/lib/utils";
-import { getImageUrl } from "~/api/utils";
+import { getImageUrl } from "~/api/storage";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";

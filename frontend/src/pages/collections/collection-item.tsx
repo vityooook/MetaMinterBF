@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { getImageUrl } from "~/api/utils";
+import { getImageUrl } from "~/api/storage";
 import { NftCollection } from "~/db/models";
 
 interface CollectionItemProps {
