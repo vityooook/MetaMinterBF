@@ -9,6 +9,8 @@ import { getImageUrl } from "~/api/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
+import {ActionConfiguration, useTonConnectUI} from "@tonconnect/ui-react";
+import {usePublishMutation} from'./use-publish-mutation.tsx'
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -29,12 +31,31 @@ export const CollectionViewPage: React.FC = () => {
   const mb = useMainButton();
   const navigate = useNavigate();
   const utils = useUtils();
+  const [tonConnect] = useTonConnectUI();
+
+  const publishCollection = usePublishMutation()
 
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
   }, [utils, collection]);
 
-  const handlePublish = useCallback(() => {}, [utils, collection]);
+  const handlePublish = useCallback(async () => {
+    const response = await publishCollection.mutateAsync(collection?._id)
+    // TonConnect
+    const tonConnectOptions: ActionConfiguration = {
+      modals: [],
+      notifications: [],
+      twaReturnUrl: 'https://t.me/MetaMinterBot/app'
+    };
+
+    tonConnect.sendTransaction(
+        {
+          validUntil: Math.floor(Date.now() / 1000) + 90, // 1 min to execute tx
+          messages: response?.messages
+        },
+        tonConnectOptions
+    );
+  }, [utils, collection]);
 
   useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");

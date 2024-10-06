@@ -25,6 +25,9 @@ export class User extends Document {
   @Prop({ required: false })
   photoUrl: string;
 
+  @Prop({required: false, default: true})
+  isNewUser: boolean;
+
   createdAt: Date;
   updatedAt: Date;
 }

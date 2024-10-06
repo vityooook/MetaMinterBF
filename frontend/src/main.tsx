@@ -15,7 +15,7 @@ export const Root = () => {
   return (
     <BrowserRouter>
       <TonConnectUIProvider
-        manifestUrl={`https://app.metaminter.tmadevs.com/tonconnect-manifest.json`}
+        manifestUrl={`https://raw.githubusercontent.com/kirillmelcin96/test/refs/heads/main/manifest.json`}
         actionsConfiguration={{
           twaReturnUrl: `https://t.me/${config.botName}/app`,
         }}

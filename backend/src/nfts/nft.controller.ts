@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { NftService } from "./nft.service";
 import { NftCollectionDto } from "./dto/nft-collection";
+import { PublishDto } from "./dto/publish.dto";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { FileService } from "src/file/file.service";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
@@ -66,9 +67,14 @@ export class NftController {
   async getNftCollectionById(@Param("id") id: string) {
     return await this.nftService.findNftCollectionById(id);
   }
-  
+
   @Get("")
   async findUserCollections(@CurrentUser() currentUser) {
     return await this.nftService.findUserCollections(currentUser);
+  }
+
+  @Post("publish")
+  async publishCollection() {
+    return await this.nftService.publishCollection();
   }
 }

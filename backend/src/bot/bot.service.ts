@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { Telegraf } from 'telegraf';
-import { I18nService } from 'nestjs-i18n';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { Telegraf } from "telegraf";
+import { I18nService } from "nestjs-i18n";
 
 @Injectable()
 export class BotService {
@@ -23,9 +23,9 @@ export class BotService {
 
     if (!botToken) {
       console.error(
-        'Bot token is not defined. Please check your environment variables.',
+        "Bot token is not defined. Please check your environment variables.",
       );
-      throw new Error('Bot token is required for initializing Telegraf');
+      throw new Error("Bot token is required for initializing Telegraf");
     }
 
     try {
@@ -34,7 +34,7 @@ export class BotService {
       this.channelName = process.env.CHANNEL_NAME;
 
       this.bot.start(async (ctx) => {
-        const userLang = ctx.from.language_code || 'en';
+        const userLang = ctx.from.language_code || "en";
 
         try {
           let user = await this.usersService.findOne({ id: ctx.from.id });
@@ -53,7 +53,7 @@ export class BotService {
 
           await this.sendStartMessage(userLang, ctx.from.id);
         } catch (error) {
-          console.error('Error in bot start', error);
+          console.error("Error in bot start", error);
         }
       });
     } catch (e) {
@@ -65,13 +65,13 @@ export class BotService {
     const botName = this.botName;
     const channelName = this.channelName;
 
-    const startButtonText = this.i18n.t('translation.start_button_text', {
+    const startButtonText = this.i18n.t("translation.start_button_text", {
       lang: userLang,
     });
-    const subscribeChannelText = this.i18n.t('translation.subscribe_channel', {
+    const subscribeChannelText = this.i18n.t("translation.subscribe_channel", {
       lang: userLang,
     });
-    const welcomeMessageText = this.i18n.t('translation.welcome_message', {
+    const welcomeMessageText = this.i18n.t("translation.welcome_message", {
       lang: userLang,
     });
 
@@ -81,7 +81,7 @@ export class BotService {
           [
             {
               text: startButtonText,
-              url: `https://t.me/${botName}/onboarding`,
+              url: `https://t.me/${botName}/app`,
             },
           ],
           [{ text: subscribeChannelText, url: `https://t.me/${channelName}` }],
@@ -89,7 +89,7 @@ export class BotService {
       };
 
       await this.bot.telegram.sendMessage(id, welcomeMessageText, {
-        parse_mode: 'Markdown',
+        parse_mode: "Markdown",
         reply_markup: markup,
       });
     } catch (error) {

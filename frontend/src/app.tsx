@@ -18,9 +18,11 @@ import { CollectionMintPage } from "./pages/collections/mint/page";
 import { CollectionViewPage } from "./pages/collections/view/page";
 import { CollectionMintedPage } from "./pages/collections/mint/minted/page";
 import { useReroute } from "./hooks/useReroute";
+import { useWalletAuth } from "~/hooks/useWalletAuth.tsx";
 
 function App() {
   useAuth();
+  useWalletAuth();
   useCollections();
   useReroute();
 
@@ -30,8 +32,8 @@ function App() {
   const mb = useMainButton();
 
   useEffect(() => {
-    mb.setBgColor('#20d2df').setTextColor('#000000')
-  }, [mb])
+    mb.setBgColor("#20d2df").setTextColor("#000000");
+  }, [mb]);
 
   useEffect(() => {
     return bindMiniAppCSSVars(miniApp, themeParams);
@@ -39,7 +41,7 @@ function App() {
 
   useEffect(() => {
     theme.setTheme(themeParams.isDark ? "dark" : "light");
-    miniApp.setBgColor('#1F1F1F')
+    miniApp.setBgColor("#1F1F1F");
     miniApp.setHeaderColor(themeParams.isDark ? "#000000" : "#ffffff");
     return bindThemeParamsCSSVars(themeParams);
   }, [themeParams]);
@@ -57,12 +59,20 @@ function App() {
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/collections" element={<CollectionPage />} />
         <Route path="/collections/create" element={<CollectionCreatePage />} />
-        <Route path="/collections/:collectionId/" element={<CollectionViewPage />} />
-        <Route path="/collections/:collectionId/mint" element={<CollectionMintPage />} />
-        <Route path="/collections/:collectionId/minted" element={<CollectionMintedPage />} />
+        <Route
+          path="/collections/:collectionId/"
+          element={<CollectionViewPage />}
+        />
+        <Route
+          path="/collections/:collectionId/mint"
+          element={<CollectionMintPage />}
+        />
+        <Route
+          path="/collections/:collectionId/minted"
+          element={<CollectionMintedPage />}
+        />
       </Routes>
       <Toaster />
-      
     </div>
   );
 }

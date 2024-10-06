@@ -22,7 +22,6 @@ export class NftService {
     files: { [key: string]: Express.Multer.File[] },
     user: User,
   ) {
-
     const savedNftItems = await Promise.all(
       createCollectionDto.items.map(async (item, index) => {
         const nftItem: Partial<NftItem> = {
@@ -59,6 +58,13 @@ export class NftService {
     const newCollection = new this.collectionModel(nftCollection);
 
     await newCollection.save();
+
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        $set: { isNewUser: false },
+      },
+    );
 
     const response = {
       ...nftCollection,
@@ -98,12 +104,9 @@ export class NftService {
       .exec();
   }
 
-  private async createNftBlockchain(
-    hash: string,
-    user_address: string,
-    item_price: bigint,
-    items_limit: number,
-  ) {
+  private async publishCollection(collectionId: string, userAddress: string) {
+    // TESTNET: kQCEHELISOI5SD5_s1CjAl859TdjfDUABbZ2yaFAlrgnoJdL
+    // MAINNET: EQBz57ewqkr-GC_RMRHybM0MGXvEm6pVvzh6bWpzBm3xAbJz
     const admin_address = "";
 
     const NftCollectionCodeBoc =
@@ -121,7 +124,7 @@ export class NftService {
     const itemContent = process.env.API_DOMAIN + "metadata/" + hash + "/";
 
     const Data = beginCell()
-      .storeAddress(Address.parse(user_address))
+      .storeAddress(Address.parse(userAddress))
       .storeAddress(Address.parse(admin_address))
       .storeRef(
         beginCell()

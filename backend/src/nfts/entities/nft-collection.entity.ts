@@ -25,7 +25,7 @@ export class NftCollection {
   @Prop({ required: false })
   imageUrl: string;
 
-  @Prop({ default: true })
+  @Prop({ default: false })
   deployed: boolean;
 
   @Prop()
