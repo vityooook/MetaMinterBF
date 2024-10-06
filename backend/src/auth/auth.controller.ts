@@ -8,7 +8,6 @@ import {
   GenerateTonProofPayload,
 } from "./dto/tonproof";
 import { checkProof, generatePayload } from "./guards/ton-proof";
-import { publishCollection } from "../blockchain/metaminter-contract";
 
 @Controller("api/auth")
 export class AuthController {
