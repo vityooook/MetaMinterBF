@@ -84,7 +84,7 @@ export class NftService {
   }
 
   async findNftCollectionById(id: string) {
-    const collection = await this.collectionModel.findOne({ _id: id });
+    const collection = await this.collectionModel.findOne({ _id: id }).populate('items');
     return collection;
   }
 
@@ -141,6 +141,18 @@ export class NftService {
       address: collectionAddress,
       amount: Number(NFT_COMMISSION),
     };
+  }
+
+  async publishCollection(collectionId: string) {
+    const collection = await this.findNftCollectionById(collectionId);
+    if (!collection) {
+      throw new Error("Collection not found");
+    }
+
+    return await this.collectionModel.updateOne(
+      { _id: collectionId },
+      { $set: { deployed: true } },
+    );
   }
 
   async collectionMetadataJson(id: string) {

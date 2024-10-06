@@ -14,9 +14,12 @@ import {
   useTonAddress,
   useTonConnectUI,
 } from "@tonconnect/ui-react";
-import { usePublishMutation } from "./use-publish-mutation.tsx";
+import { toast } from "~/components/ui/use-toast.ts";
 
-const tonConnectOptions: ActionConfiguration = {
+import { usePublishMutation } from "./use-publish-mutation.tsx";
+import { useGeneratePayloadMutation } from "./use-generate-payload.tsx";
+
+export const tonConnectOptions: ActionConfiguration = {
   modals: [],
   notifications: [],
   twaReturnUrl: "https://t.me/MetaMinterBot/app",
@@ -44,6 +47,7 @@ export const CollectionViewPage: React.FC = () => {
   const [tonConnect] = useTonConnectUI();
   const userAddress = useTonAddress();
 
+  const generatePaylaod = useGeneratePayloadMutation();
   const publishCollection = usePublishMutation();
 
   const handleShare = useCallback(() => {
@@ -52,26 +56,39 @@ export const CollectionViewPage: React.FC = () => {
 
   const handlePublish = useCallback(async () => {
     if (!collection?._id) return;
-    if(!userAddress) {
+
+    if (!userAddress) {
       return tonConnect.openModal();
     }
 
-    const response = await publishCollection.mutateAsync({
+    const payload = await generatePaylaod.mutateAsync({
       collectionId: collection?._id,
       userAddress: userAddress,
     });
 
-    tonConnect.sendTransaction(
-      {
-        validUntil: Math.floor(Date.now() / 1000) + 90,
-        messages: [{
-          address: response.address,
-          amount: response.amount,
-          stateInit: response.stateInit,
-        }],
-      },
-      tonConnectOptions
-    );
+    try {
+      await tonConnect.sendTransaction(
+        {
+          validUntil: Math.floor(Date.now() / 1000) + 90,
+          messages: [
+            {
+              address: payload.address,
+              amount: payload.amount,
+              stateInit: payload.stateInit,
+            },
+          ],
+        },
+        tonConnectOptions
+      );
+
+      publishCollection.mutate(collection?._id);
+    } catch (e) {
+      console.log(e);
+      toast({
+        variant: "destructive",
+        title: "Some error occured",
+      });
+    }
   }, [utils, collection]);
 
   useEffect(() => {

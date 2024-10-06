@@ -147,3 +147,29 @@ export const generateCollectionPayload = async (
     throw error;
   }
 };
+
+export const publishCollection = async (collectionId: string): Promise<any> => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    const response = await fetch(
+      `${config.apiUrl}/api/collections/generate-payload`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(collectionId),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in fetchCollections:", error);
+    throw error;
+  }
+};

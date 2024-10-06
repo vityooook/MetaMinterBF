@@ -64,6 +64,19 @@ export class NftController {
     );
   }
 
+  @Post("/generate-payload")
+  async generateCollectionPayload(@Body() data: PublishDto) {
+    return await this.nftService.generateCollectionPayload(
+      data.collectionId,
+      data.userAddress,
+    );
+  }
+
+  @Post("/publish")
+  async publishCollection(@Body() data: PublishDto) {
+    return await this.nftService.publishCollection(data.collectionId);
+  }
+
   @Get(":id")
   async getNftCollectionById(@Param("id") id: string) {
     return await this.nftService.findNftCollectionById(id);
@@ -72,13 +85,5 @@ export class NftController {
   @Get("")
   async findUserCollections(@CurrentUser() currentUser) {
     return await this.nftService.findUserCollections(currentUser);
-  }
-
-  @Post("/generate-payload")
-  async publishCollection(@Body() data: PublishDto) {
-    return await this.nftService.generateCollectionPayload(
-      data.collectionId,
-      data.userAddress,
-    );
   }
 }

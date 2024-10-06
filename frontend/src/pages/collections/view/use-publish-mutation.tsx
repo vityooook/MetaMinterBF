@@ -1,14 +1,24 @@
 import { useMutation } from "@tanstack/react-query";
-import { generateCollectionPayload } from "~/api/backend";
+import { publishCollection } from "~/api/backend";
 import { toast } from "~/components/ui/use-toast.ts";
+import { useCollectionStore } from "~/db/collectionStore";
+import { NftCollection } from "~/db/models";
 
 export const usePublishMutation = () => {
+  const patchCollection = useCollectionStore((state) => state.patchCollection);
   return useMutation({
-    mutationFn: generateCollectionPayload,
+    mutationFn: publishCollection,
+    onSuccess: (collection: NftCollection) => {
+      patchCollection(collection._id, collection);
+      toast({
+        title: "Success",
+        description: "Collection successully published!",
+      });
+    },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to publish collection",
+        description: "Failed to generate payload",
         variant: "destructive",
       });
     },

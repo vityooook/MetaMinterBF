@@ -10,10 +10,26 @@ import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
 import { Button } from "~/components/ui/button";
 import { MinusIcon, PlusIcon, ShareIcon, XIcon } from "lucide-react";
-import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
+import {
+  TonConnectButton,
+  useTonAddress,
+  useTonConnectUI,
+} from "@tonconnect/ui-react";
 import { Input } from "~/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCollectionById } from "~/api/backend";
+import { Footer } from "~/components/footer";
+import { tonConnectOptions } from "../view/page";
+import { beginCell, toNano } from "@ton/core";
+import { toast } from "~/components/ui/use-toast";
+
+const createBodyMessage = (quantity: number) => {
+  return beginCell()
+    .storeUint(1, 32)
+    .storeUint(0, 64)
+    .storeUint(quantity, 32)
+    .endCell();
+};
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -28,27 +44,54 @@ export const CollectionMintPage: React.FC = () => {
   useBack("/");
   const { collectionId } = useParams<{ collectionId: string }>();
 
-  const {data: collection} = useQuery({
-    queryKey: ['collections', collectionId],
+  const { data: collection } = useQuery({
+    queryKey: ["collections", collectionId],
     queryFn: async () => {
       return await fetchCollectionById(collectionId!);
     },
-    enabled: !!collectionId
-  })
+    enabled: !!collectionId,
+  });
   const miniApp = useMiniApp();
   const mb = useMainButton();
   const navigate = useNavigate();
   const utils = useUtils();
   const userAddress = useTonAddress();
   const [value, setValue] = useState(1);
-  const tonPrice = 6;
+  const [tonConnect] = useTonConnectUI();
 
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
   }, [utils, collection]);
 
-  const handleBuy = useCallback(() => {
-    navigate(`/collections/${collectionId}/minted`)
+  const handleBuy = useCallback(async () => {
+    if (!userAddress) {
+      tonConnect.openModal();
+    }
+
+    const body = createBodyMessage(value);
+
+    if (!collection?.address) {
+      toast({
+        variant: "destructive",
+        title: "Collection is not deployed yet",
+      });
+    }
+
+    await tonConnect.sendTransaction(
+      {
+        validUntil: Math.floor(Date.now() / 1000) + 90,
+        messages: [
+          {
+            address: collection?.address!,
+            amount: toNano(collection?.items[0].price! * value).toString(),
+            payload: body.toBoc().toString("base64"),
+          },
+        ],
+      },
+      tonConnectOptions
+    );
+
+    navigate(`/collections/${collectionId}/minted`);
   }, [utils, collection]);
 
   useEffect(() => {
@@ -71,12 +114,12 @@ export const CollectionMintPage: React.FC = () => {
 
   return (
     collection && (
-      <div className="-my-4 -mx-4 relative min-h-dvh flex flex-col">
+      <div className="-my-4 -mx-4 relative min-h-dvh flex flex-col pb-4">
         <Button
           onClick={handleShare}
           size="icon"
           variant="ghost"
-          className="absolute top-4 left-4 bg-black"
+          className="absolute top-4 left-4 bg-background"
         >
           <ShareIcon className="w-5 h-5" />
         </Button>
@@ -84,7 +127,7 @@ export const CollectionMintPage: React.FC = () => {
           onClick={() => navigate("/")}
           size="icon"
           variant="ghost"
-          className="absolute top-4 right-4 bg-black"
+          className="absolute top-4 right-4 bg-background"
         >
           <XIcon className="w-5 h-5" />
         </Button>
@@ -94,7 +137,7 @@ export const CollectionMintPage: React.FC = () => {
             {collection.imageUrl && (
               <img
                 src={getImageUrl(collection.imageUrl)}
-                className="rounded-2xl w-32 h-32 shadow-lg"
+                className="rounded-2xl w-32 h-32 shadow-lg bg-background"
                 alt={collection.name}
               />
             )}
@@ -150,12 +193,12 @@ export const CollectionMintPage: React.FC = () => {
           </Card>
         </section>
         {userAddress && (
-          <div className="flex px-20">
+          <div className="flex items-center px-20">
             <Button
               onClick={() => setValue(Number(value) - 1)}
               size="icon"
               variant="ghost"
-              className=" bg-black min-w-10 mt-16"
+              className=" bg-card min-w-10"
             >
               <MinusIcon className="w-5 h-5" />
             </Button>
@@ -165,13 +208,15 @@ export const CollectionMintPage: React.FC = () => {
                 value={value}
                 className="bg-transparent border-none text-4xl text-center"
               />
-              <span className="text-muted-foreground">{tonPrice * value} TON</span>
+              <span className="text-muted-foreground">
+                {collection.items[0].price * value} TON
+              </span>
             </div>
             <Button
               onClick={() => setValue(Number(value) + 1)}
               size="icon"
               variant="ghost"
-              className=" bg-black min-w-10 mt-16"
+              className=" bg-card min-w-10"
             >
               <PlusIcon className="w-5 h-5" />
             </Button>
@@ -185,6 +230,7 @@ export const CollectionMintPage: React.FC = () => {
             <TonConnectButton />
           </section>
         )}
+        <Footer />
       </div>
     )
   );
