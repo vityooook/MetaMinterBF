@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import {
   bindMiniAppCSSVars,
@@ -10,13 +10,7 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "~/components/ui/toaster";
 import { useTheme } from "./providers/shadcn-provider";
-import { WelcomePage } from "./pages/welcome/page";
-import { CollectionPage } from "./pages/collections/page";
 import { useCollections } from "./hooks/useCollections";
-import { CollectionCreatePage } from "./pages/create/page";
-import { CollectionMintPage } from "./pages/mint/page";
-import { CollectionViewPage } from "./pages/view/page";
-import { CollectionMintedPage } from "./pages/mint/minted/page";
 import { useReroute } from "./hooks/useReroute";
 import { useWalletAuth } from "~/hooks/useWalletAuth.tsx";
 
@@ -54,24 +48,7 @@ function App() {
 
   return (
     <div className="container max-w-xl py-4">
-      <Routes>
-        <Route path="/" element={<CollectionPage />} />
-        <Route path="/welcome" element={<WelcomePage />} />
-        <Route path="/collections" element={<CollectionPage />} />
-        <Route path="/collections/create" element={<CollectionCreatePage />} />
-        <Route
-          path="/collections/:collectionId/"
-          element={<CollectionViewPage />}
-        />
-        <Route
-          path="/collections/:collectionId/mint"
-          element={<CollectionMintPage />}
-        />
-        <Route
-          path="/collections/:collectionId/minted"
-          element={<CollectionMintedPage />}
-        />
-      </Routes>
+      <Outlet />
       <Toaster />
     </div>
   );

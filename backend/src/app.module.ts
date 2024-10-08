@@ -17,8 +17,9 @@ import { join } from "path";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { NftService } from "./nfts/nft.service";
 import { MongooseModule } from "@nestjs/mongoose";
-import { NftCollection, NftCollectionSchema } from "./nfts/entities/nft-collection.entity";
-import { NftItem } from "./nfts/entities/nft-item.entity";
+import { Collection, CollectionSchema } from "./nfts/entities/collection.entity";
+import { Nft } from "./nfts/entities/nft.entity";
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NftItem } from "./nfts/entities/nft-item.entity";
     AuthModule,
     BotModule,
     NftModule,
+    UploadModule,
     I18nModule.forRoot({
       fallbackLanguage: "en",
       loaderOptions: {
@@ -45,11 +47,12 @@ import { NftItem } from "./nfts/entities/nft-item.entity";
       serveRoot: "/assets/", // URL prefix to access these files
     }),
     MongooseModule.forFeature([
-      { name: NftCollection.name, schema: NftCollectionSchema },
+      { name: Collection.name, schema: CollectionSchema },
     ]),
     MongooseModule.forFeature([
-      { name: NftItem.name, schema: NftItem },
-    ])
+      { name: Nft.name, schema: Nft },
+    ]),
+    UploadModule
   ],
   controllers: [AppController],
   providers: [AppService],

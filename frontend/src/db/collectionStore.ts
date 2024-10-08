@@ -1,15 +1,15 @@
 import { create } from "zustand";
-import { NftCollection } from "./models";
+import { CollectionModel } from "./models";
 
 export interface CollectionStore {
-  collections: NftCollection[];
+  collections: CollectionModel[];
 
-  getCollection: (collectionId: string) => NftCollection | undefined;
-  setCollections: (collections: NftCollection[]) => void;
-  addCollection: (newCollection: NftCollection) => void; // New method
+  getCollection: (collectionId: string) => CollectionModel | undefined;
+  setCollections: (collections: CollectionModel[]) => void;
+  addCollection: (newCollection: CollectionModel) => void; // New method
   patchCollection: (
     collectionId: string,
-    collectionPartial: Partial<NftCollection>
+    collectionPartial: Partial<CollectionModel>
   ) => void;
 }
 

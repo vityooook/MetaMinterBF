@@ -4,7 +4,6 @@ import SocialLogo from "~/components/socia-logo";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { minifyAddress } from "~/lib/utils";
-import { getImageUrl } from "~/api/storage";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
@@ -20,7 +19,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCollectionById } from "~/api/backend";
 import { Footer } from "~/components/footer";
 import { toast } from "~/components/ui/use-toast";
-import { SDK } from "~/api/sdk";
+import { CollectionContract } from "~/contracts/collection";
+import { address } from "@ton/core";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -42,6 +42,7 @@ export const CollectionMintPage: React.FC = () => {
     },
     enabled: !!collectionId,
   });
+
   const miniApp = useMiniApp();
   const mb = useMainButton();
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export const CollectionMintPage: React.FC = () => {
   const userAddress = useTonAddress();
   const [quantity, setQuantity] = useState(1);
   const [tonConnect] = useTonConnectUI();
-  const sdk = new SDK();
+  const collectionContract = new CollectionContract();
 
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
@@ -68,12 +69,12 @@ export const CollectionMintPage: React.FC = () => {
     }
 
     try {
-      await sdk.mintNft({
+      await collectionContract.mint({
         tonConnect,
         userAddress,
         collectionAddress: collection?.address!,
         quantity,
-        price: collection?.items[0].price!,
+        price: collection?.nftPrice!,
       });
 
       navigate(`/collections/${collectionId}/minted`);
@@ -81,6 +82,16 @@ export const CollectionMintPage: React.FC = () => {
       console.log(e);
     }
   }, [utils, collection]);
+
+  useEffect(() => {
+    if (collection?.address) {
+      collectionContract.getData(address(collection.address)).then((data) => {
+        console.log({
+          owner: data
+        });
+      });
+    }
+  }, [collectionContract]);
 
   useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");
@@ -122,17 +133,17 @@ export const CollectionMintPage: React.FC = () => {
 
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
           <div className="relative">
-            {collection.imageUrl && (
+            {collection.image && (
               <img
-                src={getImageUrl(collection.imageUrl)}
+                src={collection.image}
                 className="rounded-2xl w-32 h-32 shadow-lg bg-background"
                 alt={collection.name}
               />
             )}
             <img
-              src={getImageUrl(collection.items[0].imageUrl)}
+              src={collection.nfts[0].image}
               className="rounded-2xl w-10 h-10 absolute -right-2 -bottom-2"
-              alt={collection.items[0].name}
+              alt={collection.nfts[0].name}
             />
           </div>
 
@@ -140,14 +151,18 @@ export const CollectionMintPage: React.FC = () => {
           <div className="text-muted-foreground">{collection.description}</div>
           {collection && collection.links && collection.links.length > 0 && (
             <div className="flex">
-              {collection.links.map((url, index) => (
-                <Link to={url} target="_blank" key={index}>
-                  <Badge className="flex gap-1" variant="secondary">
-                    <SocialLogo className="w-4 h-4" url={url} />
-                    {url}
-                  </Badge>
-                </Link>
-              ))}
+              {collection.links.map((url, index) =>
+                url ? (
+                  <Link to={url} target="_blank" key={index}>
+                    <Badge className="flex gap-1" variant="secondary">
+                      <SocialLogo className="w-4 h-4" url={url} />
+                      {url}
+                    </Badge>
+                  </Link>
+                ) : (
+                  <></>
+                )
+              )}
             </div>
           )}
         </header>
@@ -176,7 +191,7 @@ export const CollectionMintPage: React.FC = () => {
             </div>
             <div className="flex items-center justify-between p-3">
               <div className="text-muted-foreground">Price</div>
-              <div>{collection.items[0].price} TON</div>
+              <div>{collection.nftPrice} TON</div>
             </div>
           </Card>
         </section>
@@ -197,7 +212,7 @@ export const CollectionMintPage: React.FC = () => {
                 className="bg-transparent border-none text-4xl text-center"
               />
               <span className="text-muted-foreground">
-                {collection.items[0].price * quantity} TON
+                {collection.nftPrice * quantity} TON
               </span>
             </div>
             <Button

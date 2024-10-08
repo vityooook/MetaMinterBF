@@ -1,11 +1,13 @@
-import { PlusIcon } from "lucide-react";
+import { Loader2, PlusIcon } from "lucide-react";
 import React, { useState, useRef } from "react";
+import { useMutation } from "@tanstack/react-query"; // Import useMutation
 import { cn } from "~/lib/utils";
-import { FormDescription } from "./form";
+import { FormDescription } from "~/components/ui/form";
+import { uploadImage } from "~/api/backend";
 
 interface ImageUploadPreviewProps {
-  value: File | null;
-  onChange: (file: File | null) => void;
+  value?: string;
+  onChange: (value: string) => void;
   accept?: string;
   resolution?: { width: number; height: number };
 }
@@ -16,15 +18,13 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   accept = ".jpg,.jpeg,.png,.webp,.gif,.svg",
   ...rest
 }) => {
-  const [preview, setPreview] = useState<string | null>(
-    value ? URL.createObjectURL(value) : null
-  );
+  const [preview, setPreview] = useState<string | undefined>(value);
   const [dragging, setDragging] = useState(false);
   const [shake, setShake] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [showDescription, setShowDescription] = useState(true);
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | undefined>(undefined);
 
   const isFileTypeAllowed = (file: File): boolean => {
     const allowedTypesArray = accept.split(",").map((type) => type.trim());
@@ -33,6 +33,20 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
     return allowedTypesArray.some((type) => type.includes(fileExtension));
   };
 
+  // Use React Query's useMutation for uploading the image
+  const mutation = useMutation({
+    mutationFn: uploadImage,
+    onSuccess: (data) => {
+      console.log(data.url);
+      setPreview(data.url);
+      onChange(data.url); // Update the parent component with the URL
+    },
+    onError: (error) => {
+      triggerError(error.message);
+      triggerShakeAnimation();
+    },
+  });
+
   const handleImageUpload = async (file: File) => {
     if (!isFileTypeAllowed(file)) {
       triggerError("Invalid file type");
@@ -40,12 +54,8 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-      onChange(file);
-    };
-    reader.readAsDataURL(file);
+    // Start the upload
+    mutation.mutate(file);
   };
 
   const triggerError = (errorMessage: string) => {
@@ -53,7 +63,7 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
     setShowDescription(false);
 
     setTimeout(() => {
-      setError(null);
+      setError(undefined);
       setShowDescription(true);
     }, 3000);
   };
@@ -117,10 +127,16 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
           }}
         >
           {!preview && <PlusIcon className="w-8 h-8" />}
+          {mutation.isPending && (
+            <div className="w-fit rounded-full bg-background">
+              <Loader2 className="w-10 h-10 animate-spin" />
+            </div>
+          )}{" "}
+          {/* Loader */}
         </div>
 
         <input
-          ref={inputRef}
+          ref={inputRef as any}
           type="file"
           accept={accept}
           onChange={handleFileChange}

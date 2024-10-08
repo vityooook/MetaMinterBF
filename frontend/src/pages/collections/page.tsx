@@ -26,8 +26,8 @@ export const CollectionPage: React.FC = () => {
   }, [bb]);
 
   return (
-    <div className="h-dvh flex flex-col -my-4 py-4">
-      <header className="flex items-center justify-between pb-4">
+    <div className="min-h-dvh flex flex-col -my-4 py-4 gap-4">
+      <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img src={LogoSvg} alt="MetaMinter" className="h-6" />
         </div>
@@ -42,16 +42,18 @@ export const CollectionPage: React.FC = () => {
           </div>
         </div>
       </header>
-      <Button size="lg" onClick={handleClick} className="w-full mb-8">
-        Create Collection
-      </Button>
+      <section>
+        <Button size="lg" onClick={handleClick} className="w-full">
+          Create Collection
+        </Button>
+      </section>
       {collections && collections.length === 0 ? (
         <div className="flex-1 flex justify-center items-center text-gray-500">
           No collections found
         </div>
       ) : (
         <>
-          <div className="text-lg font-semibold mb-2">Created Collections</div>
+          <div className="text-lg font-semibold">Created Collections</div>
           <Card>
             {collections?.map((collection, index) => (
               <CollectionItem

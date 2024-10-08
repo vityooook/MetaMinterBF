@@ -5,7 +5,7 @@ import { Headset } from "lucide-react";
 
 export const Footer = () => {
   return (
-    <footer className="flex justify-between items-center mt-auto mt-4">
+    <footer className="flex justify-between items-center mt-4">
       <p className="text-sm">
         Crafted with love <br /> by <span className="text-primary">@</span>
         tmadevs

@@ -3,9 +3,9 @@ import { IsNotEmpty, IsString } from "class-validator";
 export class PublishDto {
   @IsNotEmpty()
   @IsString()
-  collectionId: string;
+  id: string;
 
   @IsNotEmpty()
   @IsString()
-  collectionAddress: string;
+  address: string;
 }

@@ -78,8 +78,9 @@ export function decodeOffChainContent(content: Cell) {
   return data.slice(1).toString();
 }
 
+// todo: move to collection contract
 // Function to build NFT collection content cell
-export function buildNftCollectionContentCell(
+export function buildCollectionContentCell(
   collectionContent: string,
   commonContent: string
 ): Cell {
@@ -100,8 +101,9 @@ export type CollectionPayload = {
   stateInitBase64: string;
 };
 
+// todo: move to collection contract
 // Main function to mint NFT collection
-export async function generateNftCollectionPayload(args: {
+export async function generateCollectionPayload(args: {
   nftCollectionCodeHex: string;
   nftItemCodeHex: string;
   admin: Address;
@@ -124,13 +126,13 @@ export async function generateNftCollectionPayload(args: {
   )[0];
 
   // Build the NFT collection data
-  const NftCollectionData = beginCell()
+  const collectionData = beginCell()
     .storeAddress(args.userOwner)
     .storeAddress(args.admin)
     .storeRef(
       beginCell()
         .storeRef(
-          buildNftCollectionContentCell(
+          buildCollectionContentCell(
             args.collectionContent,
             args.itemContent
           )
@@ -157,13 +159,13 @@ export async function generateNftCollectionPayload(args: {
     .storeUint(1, 1)
     .storeUint(0, 1)
     .storeRef(nftCollectionCodeCell)
-    .storeRef(NftCollectionData)
+    .storeRef(collectionData)
     .endCell();
 
   // Compute contract address
   const address = contractAddress(0, {
     code: nftCollectionCodeCell,
-    data: NftCollectionData,
+    data: collectionData,
   });
 
   // Convert state init cell to base64

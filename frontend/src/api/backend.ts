@@ -1,73 +1,71 @@
 import { config } from "~/config";
-import { PublishCollectionDto } from "~/db/dto";
-import { NftCollection } from "~/db/models";
-import { CollectionFormData } from "~/pages/create/zod";
+import { CollectionModel, UploadedImageModel } from "~/db/models";
+import {
+  CreateCollectionData,
+  PublishCollectionData,
+} from "~/pages/create/zod";
 
-export const createCollection = async (data: CollectionFormData) => {
+export const createCollection = async (
+  formData: CreateCollectionData
+): Promise<CollectionModel> => {
   const accessToken = localStorage.getItem("accessToken");
-
-  const formData = new FormData();
-
-  if (data.image && data.image) {
-    formData.append("image", data.image); // Append the first file
-  }
-
-  // Append collection details
-  formData.append("name", data.name);
-  formData.append("description", data.description);
-  if (data.itemsLimit) {
-    formData.append("itemsLimit", data.itemsLimit.toString());
-  }
-
-  // Append links
-  if (data.links) {
-    data.links.forEach((link) => formData.append("links[]", link));
-  }
-
-  // Convert dates to UTC and append them
-  if (data.startTime) {
-    console.log();
-    const fromDateUTC = new Date(data.startTime).getTime();
-    console.log(fromDateUTC);
-    formData.append("startTime", fromDateUTC.toString());
-  }
-  if (data.endTime) {
-    const toDateUTC = new Date(data.endTime).getTime();
-    formData.append("endTime", toDateUTC.toString());
-  }
-
-  // Append items details
-  data.items.forEach((item, index) => {
-    if (item.image && item.image) {
-      formData.append(`items.image`, item.image); // Append the first file if it exists
-    }
-    formData.append(`items[${index}][name]`, item.name);
-    formData.append(`items[${index}][description]`, item.description);
-    formData.append(`items[${index}][price]`, item.price.toString());
-  });
 
   try {
     const response = await fetch(`${config.apiUrl}/api/collections/create`, {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: formData,
+      body: JSON.stringify({
+        ...formData,
+        startTime: formData.startTime
+          ? new Date(formData.startTime).toISOString()
+          : "",
+        endTime: formData.endTime
+          ? new Date(formData.endTime).toISOString()
+          : "",
+      }),
     });
 
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message);
     }
-    const responseData = await response.json();
-    return responseData;
+    const data = await response.json();
+    return data as CollectionModel;
   } catch (error) {
     console.error("Error creating collection", error);
     throw error;
   }
 };
 
-export const fetchCollections = async (): Promise<NftCollection[]> => {
+export const publishCollection = async (
+  data: PublishCollectionData
+): Promise<CollectionModel> => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    const response = await fetch(`${config.apiUrl}/api/collections/publish`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in fetchCollections:", error);
+    throw error;
+  }
+};
+
+export const fetchCollections = async (): Promise<CollectionModel[]> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
     const response = await fetch(`${config.apiUrl}/api/collections`, {
@@ -84,7 +82,34 @@ export const fetchCollections = async (): Promise<NftCollection[]> => {
 
     const data = await response.json();
 
-    return data as NftCollection[];
+    return data as CollectionModel[];
+  } catch (error) {
+    console.error("Error in fetchCollections:", error);
+    throw error;
+  }
+};
+
+export const uploadImage = async (file: File): Promise<UploadedImageModel> => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${config.apiUrl}/api/upload/image`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    return data as UploadedImageModel;
   } catch (error) {
     console.error("Error in fetchCollections:", error);
     throw error;
@@ -93,7 +118,7 @@ export const fetchCollections = async (): Promise<NftCollection[]> => {
 
 export const fetchCollectionById = async (
   collectionId: string
-): Promise<NftCollection> => {
+): Promise<CollectionModel> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
     const response = await fetch(
@@ -113,35 +138,7 @@ export const fetchCollectionById = async (
 
     const data = await response.json();
 
-    return data as NftCollection;
-  } catch (error) {
-    console.error("Error in fetchCollections:", error);
-    throw error;
-  }
-};
-
-export const publishCollection = async (
-  data: PublishCollectionDto
-): Promise<any> => {
-  try {
-    const accessToken = localStorage.getItem("accessToken");
-    const response = await fetch(
-      `${config.apiUrl}/api/collections/generate-payload`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    return await response.json();
+    return data as CollectionModel;
   } catch (error) {
     console.error("Error in fetchCollections:", error);
     throw error;

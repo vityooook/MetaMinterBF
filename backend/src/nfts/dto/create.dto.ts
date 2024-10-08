@@ -8,9 +8,30 @@ import {
   IsDateString,
 } from "class-validator";
 import { Type } from "class-transformer";
-import { NftItemDto } from "./nft-item.dto";
 
-export class NftCollectionDto {
+export class NftDto {
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  price: number;
+}
+
+export class CollectionDto {
+  @IsOptional()
+  @IsString()
+  image: string;
+
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -24,10 +45,14 @@ export class NftCollectionDto {
   itemsLimit: number;
 
   @IsNotEmpty()
+  @IsNumber()
+  nftPrice: number;
+
+  @IsNotEmpty()
   @IsArray()
   @ValidateNested({ each: true }) // Validate each item in the array
-  @Type(() => NftItemDto) // Transform plain objects to ItemDto instances
-  items: NftItemDto[]; // Items should be an array of ItemDto
+  @Type(() => NftDto) // Transform plain objects to ItemDto instances
+  nfts: NftDto[]; // Items should be an array of ItemDto
 
   @IsOptional()
   @IsArray()
@@ -35,9 +60,9 @@ export class NftCollectionDto {
 
   @IsOptional()
   @IsDateString()
-  startTime?: string;
+  startTime?: Date;
 
   @IsOptional()
   @IsDateString()
-  endTime?: string;
+  endTime?: Date;
 }

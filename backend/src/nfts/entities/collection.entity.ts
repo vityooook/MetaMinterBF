@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, SchemaTypes } from "mongoose";
 
-export type NftCollectionDocument = NftCollection & Document;
+export type CollectionDocument = Collection & Document;
 
 @Schema({ timestamps: true })
-export class NftCollection {
+export class Collection {
   _id: string;
 
   @Prop({
@@ -23,10 +23,13 @@ export class NftCollection {
   description: string;
 
   @Prop({ required: false })
-  imageUrl: string;
+  image: string;
 
   @Prop({ default: false })
   deployed: boolean;
+
+  @Prop({ default: false })
+  deploying: boolean;
 
   @Prop()
   address: string;
@@ -38,10 +41,16 @@ export class NftCollection {
   itemsLimit: number;
 
   @Prop({
-    type: [{ type: SchemaTypes.ObjectId, ref: "NftItem", default: [] }],
+    type: Number,
+    required: true,
+  })
+  nftPrice: number;
+
+  @Prop({
+    type: [{ type: SchemaTypes.ObjectId, ref: "Nft", default: [] }],
     required: false,
   })
-  items: string[];
+  nfts: string[];
 
   @Prop({
     type: [{ type: String }],
@@ -49,19 +58,19 @@ export class NftCollection {
   links: string[];
 
   @Prop({
-    type: String,
+    type: Date,
     required: false,
   })
-  startTime: string;
+  startTime: Date;
 
   @Prop({
-    type: String,
+    type: Date,
     required: false,
   })
-  endTime: string;
+  endTime: Date;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export const NftCollectionSchema = SchemaFactory.createForClass(NftCollection);
+export const CollectionSchema = SchemaFactory.createForClass(Collection);

@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
-import { getImageUrl } from "~/api/storage";
-import { NftCollection } from "~/db/models";
+import { CollectionModel } from "~/db/models";
 
 interface CollectionItemProps {
-  collection: NftCollection;
+  collection: CollectionModel;
   toncoinPrice: number;
 }
 
@@ -12,7 +11,7 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
   toncoinPrice,
 }) => {
   const getPriceInUsd = () => {
-    const price = Number(collection.items[0].price);
+    const price = Number(collection.nftPrice);
     const usd_price = price * toncoinPrice;
     return usd_price.toFixed(2);
   };
@@ -23,13 +22,11 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
       className="block p-3 border-b border-border last:border-none"
     >
       <div className="flex gap-4 items-center collection-item">
-        {collection.imageUrl && (
-          <img
-            src={getImageUrl(collection.imageUrl)}
-            alt={collection.image}
-            className="w-10 h-10 rounded-lg"
-          />
-        )}
+        <img
+          src={collection.image}
+          alt={collection.image}
+          className="w-10 h-10 rounded-lg"
+        />
         <div className="flex-grow flex flex-col justify-between">
           <div className="text-lg font-semibold">{collection.name}</div>
           <div className="text-sm text-gray-500">
@@ -38,7 +35,7 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
         </div>
         <div className="text-right flex flex-col justify-between">
           <div className="text-lg font-semibold">
-            {collection.items[0].price} TON
+            {collection.nftPrice} TON
           </div>
           {toncoinPrice && (
             <div className="text-sm text-gray-500">≈ {getPriceInUsd()}$</div>

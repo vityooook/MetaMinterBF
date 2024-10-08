@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type NftItemDocument = NftItem & Document;
+export type NftDocument = Nft & Document;
 
 @Schema({ timestamps: true })
-export class NftItem {
+export class Nft {
   @Prop({ required: true })
   name: string;
 
@@ -12,15 +12,10 @@ export class NftItem {
   description?: string;
 
   @Prop({ required: false })
-  imageUrl: string;
-
-  @Prop({
-    type: Number,
-  })
-  price?: number;
+  image: string;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export const NftItemSchema = SchemaFactory.createForClass(NftItem);
+export const NftSchema = SchemaFactory.createForClass(Nft);

@@ -1,19 +1,17 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import SocialLogo from "~/components/socia-logo";
-import { useCollectionStore } from "~/db/collectionStore";
-import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 import { minifyAddress } from "~/lib/utils";
-import { getImageUrl } from "~/api/storage.ts";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { toast } from "~/components/ui/use-toast.ts";
-
-import { usePublishMutation } from "./use-publish-mutation.tsx";
-import { SDK } from "~/api/sdk.ts";
+import { useCollectionStore } from "~/db/collectionStore";
+import { Badge } from "~/components/ui/badge";
+import SocialLogo from "~/components/socia-logo";
+import { CollectionContract } from "~/contracts/collection";
+import { useDeployMutation } from "../create/hooks/useDeployMutation";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -27,45 +25,40 @@ export function generateShareUrl(text: string = "", id: string): string {
 export const CollectionViewPage: React.FC = () => {
   useBack("/");
   const { collectionId } = useParams<{ collectionId: string }>();
-  const collection = useCollectionStore((state) =>
-    state.getCollection(collectionId!)
-  );
   const miniApp = useMiniApp();
   const mb = useMainButton();
   const navigate = useNavigate();
   const utils = useUtils();
   const [tonConnect] = useTonConnectUI();
   const userAddress = useTonAddress();
-  const sdk = new SDK();
+  const collectionContract = new CollectionContract();
+  const deployCollection = useDeployMutation();
+  const collection = useCollectionStore((state) =>
+    state.getCollection(collectionId!)
+  );
+  const [isDeploying, setIsDeploying] = useState(false);
 
-  const publishCollection = usePublishMutation();
-
-  const handleShare = useCallback(() => {
-    utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
-  }, [utils, collection]);
-
-  const handlePublish = useCallback(async () => {
-    if (!collection?._id || collection.items.length === 0) return;
-
+  const handleDeploy = useCallback(async () => {
     if (!userAddress) {
       return tonConnect.openModal();
     }
 
+    if (!collection) {
+      return;
+    }
+
+    setIsDeploying(true);
+
     try {
-      const payload = await sdk.publishCollection({
+      const payload = await collectionContract.deploy({
         tonConnect,
         userAddress,
-        collectionId: collection._id,
-        itemId: collection.items[0]._id!,
-        price: collection.items[0].price,
-        limit: collection.itemsLimit,
-        startTime: collection.startTime,
-        endTime: collection.endTime,
+        collection,
       });
 
-      publishCollection.mutate({
-        collectionId: collection?._id,
-        collectionAddress: payload.address.toString(),
+      await deployCollection.mutateAsync({
+        id: collection?._id,
+        address: payload.address.toString(),
       });
     } catch (e) {
       console.log(e);
@@ -74,6 +67,12 @@ export const CollectionViewPage: React.FC = () => {
         title: "Some error occured",
       });
     }
+
+    setIsDeploying(false);
+  }, [utils]);
+
+  const handleShare = useCallback(() => {
+    utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
   }, [utils, collection]);
 
   useEffect(() => {
@@ -81,36 +80,44 @@ export const CollectionViewPage: React.FC = () => {
   }, [miniApp]);
 
   useEffect(() => {
+    if (isDeploying) {
+      mb.disable().setText("Deploying");
+    } else {
+      mb.enable().setText("Deploy Collection");
+    }
+  }, [mb, isDeploying]);
+
+  useEffect(() => {
     mb.show().enable();
 
     if (collection?.deployed) {
-      mb.setText("Share").on("click", handleShare);
+      mb.setText("Share Collection").on("click", handleShare);
     } else {
-      mb.setText("Publish").on("click", handlePublish);
+      mb.setText("Deploy Collection").on("click", handleDeploy);
     }
 
     return () => {
       mb.hide().off("click", handleShare);
-      mb.off("click", handlePublish);
+      mb.off("click", handleDeploy);
     };
-  }, [mb, collection, navigate, handleShare, handlePublish]);
+  }, [mb, collection, navigate, handleShare, handleDeploy]);
 
   return (
     collection && (
       <div className="-mt-4 -mx-4">
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
           <div className="relative">
-            {collection.imageUrl && (
+            {collection.image && (
               <img
-                src={getImageUrl(collection.imageUrl)}
+                src={collection.image}
                 className="rounded-2xl w-32 h-32 shadow-lg"
                 alt={collection.name}
               />
             )}
             <img
-              src={getImageUrl(collection.items[0].imageUrl)}
+              src={collection.nfts[0].image}
               className="rounded-2xl w-10 h-10 absolute -right-2 -bottom-2"
-              alt={collection.items[0].name}
+              alt={collection.nfts[0].name}
             />
           </div>
 
@@ -118,14 +125,18 @@ export const CollectionViewPage: React.FC = () => {
           <div className="text-muted-foreground">{collection.description}</div>
           {collection && collection.links && collection.links.length > 0 && (
             <div className="flex">
-              {collection.links.map((url, index) => (
-                <Link to={url} target="_blank" key={index}>
-                  <Badge className="flex gap-1" variant="secondary">
-                    <SocialLogo className="w-4 h-4" url={url} />
-                    {url}
-                  </Badge>
-                </Link>
-              ))}
+              {collection.links?.map((url, index) =>
+                url ? (
+                  <Link to={url} target="_blank" key={index}>
+                    <Badge className="flex gap-1" variant="secondary">
+                      <SocialLogo className="w-4 h-4" url={url} />
+                      {url}
+                    </Badge>
+                  </Link>
+                ) : (
+                  <></>
+                )
+              )}
             </div>
           )}
         </header>
@@ -154,7 +165,7 @@ export const CollectionViewPage: React.FC = () => {
             </div>
             <div className="flex items-center justify-between p-3">
               <div className="text-muted-foreground">Price</div>
-              <div>{collection.items[0].price} TON</div>
+              <div>{collection.nftPrice} TON</div>
             </div>
           </Card>
         </section>
