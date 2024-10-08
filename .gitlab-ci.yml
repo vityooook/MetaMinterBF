@@ -1,0 +1,39 @@
+stages:
+  - prepare
+  - build
+
+prepare:
+  stage: prepare
+  tags:
+    - hm-docker
+  only:
+    - branches
+  image: alpine:latest
+  script:
+    - apk add --no-cache gettext
+    - envsubst < $DEV_FRONTEND_ENV_FILE > ${CI_PROJECT_DIR}/frontend/.env
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/frontend/.env
+
+build:
+  stage: build
+  tags:
+    - hm-docker
+  only:
+    - branches
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  parallel:
+    matrix:
+      - TYPE_SERVER: [frontend, backend]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - |
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}" \
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile-${TYPE_SERVER}" \
+        --destination "${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:${CI_COMMIT_BRANCH}" \
+        --build-arg "TYPE_SERVER=${TYPE_SERVER}"
