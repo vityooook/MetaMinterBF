@@ -13,8 +13,7 @@ WORKDIR /app
 ARG TYPE_SERVER
 ENV TYPE_SERVER="$TYPE_SERVER"
 
-COPY package.json ./package.json
-COPY yarn.lock ./
+COPY package.json yarn.lock ./
 
 COPY $TYPE_SERVER/package.json ./$TYPE_SERVER/
 
