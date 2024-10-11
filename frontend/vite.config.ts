@@ -3,7 +3,7 @@ import path from "path";
 import react from "@vitejs/plugin-react";
 import fs from "fs";
 import { ViteDevServer } from "vite";
-import nodePolyfills from "@esbuild-plugins/node-modules-polyfill";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 const serveLocales = () => ({
   name: "serve-locales",
@@ -71,7 +71,6 @@ export default defineConfig({
     alias: {
       "~": path.resolve(__dirname, "./src"),
       "~locales": path.resolve(__dirname, "../shared/locales"),
-      buffer: "buffer",
     },
   },
 });
