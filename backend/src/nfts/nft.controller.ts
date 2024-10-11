@@ -31,6 +31,11 @@ export class NftController {
     return await this.nftService.findCollectionById(id);
   }
 
+  @Get("/check/:id")
+  async checkIsCollectionDeployed(@Param("id") id: string) {
+    return await this.nftService.checkIsCollectionDeployed(id);
+  }
+
   @Get("")
   async findUserCollections(@CurrentUser() currentUser) {
     return await this.nftService.findUserCollections(currentUser);

@@ -5,6 +5,7 @@ import { Collection } from "./entities/collection.entity";
 import { User } from "../users/entities/user.entity";
 import { CollectionDto } from "./dto/create.dto";
 import { Nft } from "./entities/nft.entity";
+import axios from 'axios';
 
 @Injectable()
 export class NftService {
@@ -51,7 +52,6 @@ export class NftService {
 
     const response = {
       ...plainCollection,
-      deployed: true,
       nfts: savedNfts.map((nft) => ({
         _id: nft._id.toString(),
         name: nft.name,
@@ -92,8 +92,10 @@ export class NftService {
     }
 
     return await this.collectionModel.updateOne(
-      { _id: id },
-      { $set: { deployed: true, address } },
+        { _id: id },
+        {
+          $set: { address },
+        },
     );
   }
 
@@ -119,5 +121,34 @@ export class NftService {
     };
 
     return result;
+  }
+
+  async checkIsCollectionDeployed(id: string) {
+    const collection = await this.findCollectionById(id);
+
+    if (!collection?.address) return
+
+    const httpHeaders = process.env.TONCENTER_API_KEY
+        ? { 'X-API-Key': process.env.TONCENTER_API_KEY }
+        : undefined;
+
+    const http = axios.create({
+      baseURL: process.env.TONCENTER_API_ENDPOINT || 'https://toncenter.com/api/v3',
+      headers: httpHeaders,
+    });
+
+    const { data: collectionStatus } = await http.get(`/accountStates?address=${collection?.address}`);
+    if (collectionStatus?.accounts[0]?.status === "active") {
+      await this.collectionModel.updateOne(
+          { _id: id },
+          {
+            $set: { deployed: true },
+          },
+      );
+
+      return { ok: true, status: 'active'}
+    } else {
+      return { ok: false, status: 'uninit' }
+    }
   }
 }

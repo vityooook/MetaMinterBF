@@ -14,7 +14,7 @@ export const useDeployMutation = () => {
 
       toast({
         title: "Success",
-        description: "Collection successully published!",
+        description: "Collection successully deployed!",
       });
     },
     onError: () => {

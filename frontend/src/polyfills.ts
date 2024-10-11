@@ -1,7 +1,8 @@
 import { Buffer } from 'buffer';
 
-globalThis.Buffer = Buffer;
-(window as any).global = window;
+if (!globalThis.Buffer) {
+  globalThis.Buffer = Buffer;
+}
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
