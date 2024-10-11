@@ -12,12 +12,12 @@ export const useCreateMutation = () => {
       addCollection(nftCollection);
 
       toast({
-        title: "Коллекция успешно добавлена",
+        title: "Collection is created",
       });
     },
     onError: () => {
       toast({
-        title: "Ошибка при добавлении коллекции",
+        title: "Cannot create collection.",
         variant: "destructive",
       });
     },

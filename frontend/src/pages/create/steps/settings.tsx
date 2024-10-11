@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { Input } from "~/components/ui/input";
 import {
@@ -10,7 +11,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { createCollectionSchema } from "../zod";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, ChangeEvent } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
@@ -85,15 +86,28 @@ export const SettingsForm = () => {
           name="nftPrice" // Update to handle only one item
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Цена NFT</FormLabel>
+              <FormLabel>NFT Price</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Введите цену NFT"
+                  placeholder="Enter NFT price"
                   type="input"
                   inputMode="decimal"
                   {...field}
+
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    const value = event.target.value;
+                    const decimalRegex =
+                      /^[+-]?([0-9]+([.,][0-9]*)?|[.][0-9]+)$/;
+
+                    if (decimalRegex.test(value) || value === "") {
+                      field.onChange(value.replace(/,/g, "."));
+                    }
+                  }}
                 />
               </FormControl>
+              <FormDescription>
+                Please enter the price per copy.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -104,27 +118,27 @@ export const SettingsForm = () => {
           name="itemsLimit"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ограничение по количеству предметов</FormLabel>
+              <FormLabel>Amount</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Введите лимит предметов"
+                  placeholder="Enter amount"
                   type="input"
                   pattern="\d*"
                   inputMode="decimal"
                   {...field}
+                  
                 />
               </FormControl>
               <FormDescription>
-                How many items should be available for mint. Leave empty if
-                there's no limit
+                Specify the number of NFTs available for purchase
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormItem>
-          <FormLabel>Date</FormLabel>
+        <FormItem className="gap-2">
+          <FormLabel>Timer</FormLabel>
           <div className="flex gap-2 items-center">
             <FormField
               control={form.control}
@@ -133,7 +147,6 @@ export const SettingsForm = () => {
                 <FormItem className="flex-1">
                   <FormControl>
                     <Input
-                      placeholder="Выберите начальную дату"
                       type="datetime-local"
                       min={today}
                       {...field}
@@ -158,7 +171,6 @@ export const SettingsForm = () => {
                   <FormControl>
                     <Input
                       type="datetime-local"
-                      placeholder="Выберите конечную дату"
                       min={fromDate || today} // Disable dates before fromDate
                       {...field}
                     />
@@ -168,6 +180,10 @@ export const SettingsForm = () => {
               )}
             />
           </div>
+
+          <FormDescription>
+            Specify when the sale of the collection will start and end
+          </FormDescription>
         </FormItem>
       </form>
     </Form>

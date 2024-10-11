@@ -1,4 +1,4 @@
-import { UseFormReturn } from "react-hook-form";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -6,7 +6,10 @@ import {
   FormMessage,
   FormLabel,
 } from "~/components/ui/form";
-import { AdornedInput, Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { XIcon } from "lucide-react";
+import { getPlatformIcon } from "~/lib/social-utils";
 import { FormData } from "../steps/collection";
 
 interface LinksFieldProps {
@@ -15,170 +18,93 @@ interface LinksFieldProps {
   label?: string;
 }
 
-export const LinksField: React.FC<LinksFieldProps> = ({ form, label }) => {
-  const { control } = form;
+export const LinksField: React.FC<LinksFieldProps> = ({
+  form,
+  label,
+  max = 10,
+}) => {
+  const { control, register, setFocus } = form;
+  const { fields, append, remove } = useFieldArray({
+    control,
+    //@ts-ignore
+    name: "links",
+    rules: {
+      maxLength: max,
+    },
+  });
+
+  const handleKeyPress = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (fields.length < max) {
+        append("" as any);
+        setTimeout(() => {
+          setFocus(`links.${index + 1}`);
+        }, 0);
+      }
+    }
+  };
 
   return (
     <div className="space-y-2">
       <FormLabel>{label}</FormLabel>
+      {fields.map((field, index) => (
+        <FormField
+          key={field.id}
+          control={control}
+          name={`links.${index}`}
+          render={({ field }) => (
+            <FormItem className="relative space-y-0">
+              <FormControl>
+                <div className="flex items-center relative">
+                  {/* Input for URL */}
+                  <Input
+                    type="url"
+                    placeholder={`Enter URL ${index + 1}`}
+                    className={`${field.name} pl-10`}
+                    {...field}
+                    {...register(`links.${index}`)}
+                    onKeyDownCapture={(e) => handleKeyPress(e, index)}
+                  />
 
-      <FormField
-        control={control}
-        name="links.0"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://twitter.com/"
-                urlPattern={/https?:\/\/(www\.)?twitter\.com\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+                  {/* Platform Icon */}
+                  <div className="ml-2 absolute top-2.5 left-1">{getPlatformIcon(field.value, 4)}</div>
+                </div>
+              </FormControl>
 
-      <FormField
-        control={control}
-        name="links.1"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://discord.gg/"
-                urlPattern={/https?:\/\/(www\.)?discord\.g\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <FormMessage />
 
-      <FormField
-        control={control}
-        name="links.2"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://t.me/"
-                urlPattern={/https?:\/\/(www\.)?t\.me\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              {/* Remove Button */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute top-0 right-0 text-destructive"
+                onClick={() => remove(index)}
+                disabled={fields.length === 1}
+              >
+                <XIcon className="w-5 h-5" />
+              </Button>
+            </FormItem>
+          )}
+        />
+      ))}
 
-      <FormField
-        control={control}
-        name="links.3"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://instagram.com/"
-                urlPattern={/https?:\/\/(www\.)?instagram\.com\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="links.4"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://youtube.com/"
-                urlPattern={/https?:\/\/(www\.)?youtube\.com\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="links.5"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://tiktok.com/"
-                urlPattern={/https?:\/\/(www\.)?tiktok\.com\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="links.6"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <AdornedInput
-                {...field}
-                startAdornment="https://vk.com/"
-                urlPattern={/https?:\/\/(www\.)?vk\.com\//}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="links.7"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <Input {...field} placeholder="Any Link" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="links.8"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <Input {...field} placeholder="Any Link" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="links.9"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <Input {...field} placeholder="Any Link" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Add more Button */}
+      <Button
+        type="button"
+        disabled={fields.length >= max}
+        className="bg-card w-full"
+        onClick={() => {
+          append("" as any);
+          setFocus(`links.${fields.length}`);
+        }}
+      >
+        Add more
+      </Button>
     </div>
   );
 };

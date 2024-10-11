@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 interface CountdownProps {
-  endTime: string; // ISO string for end time
+  time: string; // ISO string for end time
+  className?: string;
 }
 
 interface TimeLeft {
@@ -11,7 +12,10 @@ interface TimeLeft {
   seconds: number;
 }
 
-export const Countdown: React.FC<CountdownProps> = ({ endTime }) => {
+export const Countdown: React.FC<CountdownProps> = ({
+  time: endTime,
+  className,
+}) => {
   const calculateTimeLeft = (): TimeLeft | null => {
     const difference = new Date(endTime).getTime() - new Date().getTime();
     if (difference > 0) {
@@ -25,7 +29,9 @@ export const Countdown: React.FC<CountdownProps> = ({ endTime }) => {
     return null;
   };
 
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(
+    calculateTimeLeft()
+  );
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -36,7 +42,7 @@ export const Countdown: React.FC<CountdownProps> = ({ endTime }) => {
   }, [endTime]);
 
   const padNumber = (num: number): string => {
-    return num.toString().padStart(2, '0');
+    return num.toString().padStart(2, "0");
   };
 
   const renderTimeLeft = () => {
@@ -46,10 +52,18 @@ export const Countdown: React.FC<CountdownProps> = ({ endTime }) => {
 
     return (
       <>
-        <span>{timeLeft.days}d </span>
-        <span>{padNumber(timeLeft.hours)}h </span>
-        <span>{padNumber(timeLeft.minutes)}min </span>
-        <span>{padNumber(timeLeft.seconds)}s</span>
+        <span>
+          <span className={className}>{timeLeft.days}</span>d{" "}
+        </span>
+        <span>
+          <span className={className}>{padNumber(timeLeft.hours)}</span>h{" "}
+        </span>
+        <span>
+          <span className={className}>{padNumber(timeLeft.minutes)}</span>m{" "}
+        </span>
+        <span>
+          <span className={className}>{padNumber(timeLeft.seconds)}</span>s{" "}
+        </span>
       </>
     );
   };

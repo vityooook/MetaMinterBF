@@ -77,3 +77,21 @@ export function getTokens(
     return isTeacher ? tokens[1] : tokens[0]; // Different amounts for users and teachers
   }
 }
+
+export function formatDateToLocal(dateString: string): string {
+  const date = new Date(dateString);
+
+  // Define options with the correct types
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  };
+
+  // Format the date and remove the comma between the date and time
+  const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+  return formattedDate.replace(',', ''); // Remove comma
+}

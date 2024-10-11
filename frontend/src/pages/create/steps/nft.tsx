@@ -89,9 +89,9 @@ export const NftForm = () => {
           name="nfts.0.name" // Update to handle only one item
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Название NFT</FormLabel>
+              <FormLabel>NFT Name</FormLabel>
               <FormControl>
-                <Input placeholder="Введите название NFT" {...field} />
+                <Input placeholder="Enter NFT name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -103,11 +103,11 @@ export const NftForm = () => {
           name="nfts.0.description" // Update to handle only one item
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Описание NFT</FormLabel>
+              <FormLabel>NFT Description</FormLabel>
               <FormControl>
                 <Textarea
                   rows={3}
-                  placeholder="Введите описание NFT"
+                  placeholder="Enter NFT description"
                   {...field}
                 />
               </FormControl>

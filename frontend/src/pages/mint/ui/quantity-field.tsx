@@ -8,7 +8,10 @@ interface QuantityFieldProps {
   onQuantityChange?: (quantity: number) => void; // Added optional onChange prop
 }
 
-export const QuantityField: React.FC<QuantityFieldProps> = ({ onQuantityChange, nftPrice }) => {
+export const QuantityField: React.FC<QuantityFieldProps> = ({
+  onQuantityChange,
+  nftPrice,
+}) => {
   const [quantity, setQuantity] = useState<number>(1);
 
   const handleDecrement = () => {
@@ -35,7 +38,7 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({ onQuantityChange, 
 
   return (
     <>
-      <div className="flex items-center px-20">
+      <div className="flex items-center px-20 gap-2">
         <Button
           onClick={handleDecrement}
           size="icon"
@@ -48,8 +51,8 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({ onQuantityChange, 
           <Input
             onChange={handleInputChange}
             value={quantity}
-            type="number"
-            
+            type="input"
+            pattern="\d*"
             className="bg-transparent border-none text-4xl text-center"
             min={0} // Ensure that input cannot go below 0
           />

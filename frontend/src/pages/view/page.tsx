@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Card } from "~/components/ui/card";
-import { minifyAddress } from "~/lib/utils";
+import { formatDateToLocal, minifyAddress } from "~/lib/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
@@ -9,10 +9,10 @@ import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { toast } from "~/components/ui/use-toast.ts";
 import { useCollectionStore } from "~/db/collectionStore";
 import { Badge } from "~/components/ui/badge";
-import SocialLogo from "~/components/socia-logo";
 import { CollectionContract } from "~/contracts/collection";
 import { useDeployMutation } from "../create/hooks/useDeployMutation";
 import { ConfirmDeploy } from "./steps/confirm";
+import { getPlatformTitle, getPlatformIcon } from "~/lib/social-utils";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -105,7 +105,9 @@ export const CollectionViewPage: React.FC = () => {
     };
   }, [mb, collection, navigate, handleShare, handleDeploy]);
 
-  return isDeploying ? <ConfirmDeploy /> : (
+  return isDeploying ? (
+    <ConfirmDeploy />
+  ) : (
     collection && (
       <div className="-mt-4 -mx-4">
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
@@ -126,14 +128,15 @@ export const CollectionViewPage: React.FC = () => {
 
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
           <div className="text-muted-foreground">{collection.description}</div>
+
           {collection && collection.links && collection.links.length > 0 && (
-            <div className="flex">
+            <div className="flex gap-2">
               {collection.links?.map((url, index) =>
                 url ? (
                   <Link to={url} target="_blank" key={index}>
-                    <Badge className="flex gap-1" variant="secondary">
-                      <SocialLogo className="w-4 h-4" url={url} />
-                      {url}
+                    <Badge className="flex gap-2 px-1.5" variant="secondary">
+                      {getPlatformIcon(url, 4)}
+                      {getPlatformTitle(url)}
                     </Badge>
                   </Link>
                 ) : (
@@ -146,6 +149,18 @@ export const CollectionViewPage: React.FC = () => {
 
         <section className="px-4 py-5">
           <Card>
+            {collection.startTime && (
+              <div className="flex items-center justify-between p-3 border-b border-border">
+                <div className="text-muted-foreground">Start Time</div>
+                <div>{formatDateToLocal(collection.startTime)}</div>
+              </div>
+            )}
+            {collection.endTime && (
+              <div className="flex items-center justify-between p-3 border-b border-border">
+                <div className="text-muted-foreground">End Time</div>
+                <div>{formatDateToLocal(collection.endTime)}</div>
+              </div>
+            )}
             {collection.address && (
               <div className="flex items-center justify-between p-3 border-b border-border">
                 <div className="text-muted-foreground">Address</div>
@@ -172,7 +187,7 @@ export const CollectionViewPage: React.FC = () => {
             </div>
           </Card>
         </section>
-
+        <Link to={`/collections/${collection._id}/mint`}>Mint</Link>
       </div>
     )
   );

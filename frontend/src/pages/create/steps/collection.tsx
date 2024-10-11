@@ -42,6 +42,7 @@ export const CollectionForm = () => {
       image: formData.image,
       name: formData.name,
       description: formData.description,
+      links: []
     },
   });
 
@@ -92,9 +93,9 @@ export const CollectionForm = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Название коллекции</FormLabel>
+              <FormLabel>Collection Name</FormLabel>
               <FormControl>
-                <Input placeholder="Введите название коллекции" {...field} />
+                <Input placeholder="Enter Collection name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -106,11 +107,11 @@ export const CollectionForm = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Описание коллекции</FormLabel>
+              <FormLabel>Collection Description</FormLabel>
               <FormControl>
                 <Textarea
                   rows={3}
-                  placeholder="Введите описание коллекции"
+                  placeholder="Enter Collection description"
                   {...field}
                 />
               </FormControl>

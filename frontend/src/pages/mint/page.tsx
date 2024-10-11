@@ -1,35 +1,26 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import SocialLogo from "~/components/socia-logo";
-import { Badge } from "~/components/ui/badge";
-import { Card } from "~/components/ui/card";
-import { minifyAddress } from "~/lib/utils";
-import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
-import { useBack } from "~/hooks/useBack";
-import { config } from "~/config";
-import { Button } from "~/components/ui/button";
-import { ShareIcon, XIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useMiniApp, useMainButton, useUtils } from "@telegram-apps/sdk-react";
+import { address } from "@ton/core";
 import {
-  TonConnectButton,
   useTonAddress,
   useTonConnectUI,
+  TonConnectButton,
 } from "@tonconnect/ui-react";
-import { useQuery } from "@tanstack/react-query";
+import { ShareIcon, XIcon } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchCollectionById } from "~/api/backend";
+import { Countdown } from "~/components/countdown";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { toast } from "~/components/ui/use-toast";
 import { CollectionContract } from "~/contracts/collection";
-import { address } from "@ton/core";
-import { Countdown } from "~/components/countdown";
+import { useBack } from "~/hooks/useBack";
+import { getPlatformIcon, getPlatformTitle } from "~/lib/social-utils";
+import { minifyAddress } from "~/lib/utils";
+import { generateShareUrl } from "../view/page";
 import { QuantityField } from "./ui/quantity-field";
-
-export function generateShareUrl(text: string = "", id: string): string {
-  const encodedText = encodeURIComponent(text);
-  const encodedUrl = encodeURIComponent(
-    `https://t.me/${config.botName}/app?startapp=nft-${id.toString()}`
-  );
-
-  return `https://t.me/share/url?text=${encodedText}&url=${encodedUrl}`;
-}
+import { Badge } from "~/components/ui/badge";
 
 export const CollectionMintPage: React.FC = () => {
   useBack("/");
@@ -99,7 +90,7 @@ export const CollectionMintPage: React.FC = () => {
     if (userAddress) {
       mb.show();
 
-      if(quantity === 0) {
+      if (quantity === 0) {
         mb.disable();
       } else {
         mb.enable();
@@ -107,13 +98,21 @@ export const CollectionMintPage: React.FC = () => {
 
       if (collection?.deployed) {
         mb.setText("Mint NFT").on("click", handleBuy);
+      } else {
+        mb.hide();
       }
+    } else {
+      mb.hide();
     }
 
     return () => {
       mb.hide().off("click", handleBuy);
     };
   }, [mb, collection, userAddress, navigate, handleShare]);
+
+  const isBeforeStartTime = collection?.startTime
+    ? new Date(collection.startTime) > new Date()
+    : false;
 
   return (
     collection && (
@@ -153,74 +152,92 @@ export const CollectionMintPage: React.FC = () => {
 
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
           <div className="text-muted-foreground">{collection.description}</div>
-          {collection && collection.links && collection.links.length > 0 && (
-            <div className="flex">
-              {collection.links.map((url, index) =>
+
+          {collection.links?.length > 0 && (
+            <div className="flex gap-2">
+              {collection.links?.map((url, index) =>
                 url ? (
                   <Link to={url} target="_blank" key={index}>
-                    <Badge className="flex gap-1" variant="secondary">
-                      <SocialLogo className="w-4 h-4" url={url} />
-                      {url}
+                    <Badge className="flex gap-2 px-1.5" variant="secondary">
+                      {getPlatformIcon(url, 4)}
+                      {getPlatformTitle(url)}
                     </Badge>
                   </Link>
-                ) : (
-                  <></>
-                )
+                ) : null
               )}
             </div>
           )}
         </header>
 
-        <section className="px-4 py-5">
-          <Card>
-            {collection.address && (
-              <div className="flex items-center justify-between p-3 border-b border-border">
-                <div className="text-muted-foreground">Address</div>
-                <div>
-                  <Link
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    to={`https://tonscan.org/address/${collection.address}`}
-                  >
-                    {minifyAddress(collection.address)}
-                  </Link>
+        {isBeforeStartTime ? (
+          <>
+            <section className="flex flex-col items-center pt-10">
+              <div className="flex gap-3">
+                <Countdown
+                  time={collection.startTime!}
+                  className="text-primary italic text-5xl font-bold tracking-tighter"
+                />
+              </div>
+            </section>
+            <section className="mt-auto text-center mb-10">
+              <p className="text-2xl">Mint will start soon</p>
+              <p className="text-muted-foreground">Please wait...</p>
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="px-4 py-5">
+              <Card>
+                {collection.address && (
+                  <div className="flex items-center justify-between p-3 border-b border-border">
+                    <div className="text-muted-foreground">Address</div>
+                    <div>
+                      <Link
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        to={`https://tonscan.org/address/${collection.address}`}
+                      >
+                        {minifyAddress(collection.address)}
+                      </Link>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center justify-between p-3 border-b border-border">
+                  <div className="text-muted-foreground">Total Minted</div>
+                  <div>
+                    {collectionData?.totalMinted || 0} /{" "}
+                    {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit}
+                  </div>
                 </div>
-              </div>
-            )}
-            <div className="flex items-center justify-between p-3 border-b border-border">
-              <div className="text-muted-foreground">Total Minted</div>
-              <div>
-                {collectionData?.totalMinted || 0} /{" "}
-                {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit}
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-3">
-              <div className="text-muted-foreground">Price</div>
-              <div>{collection.nftPrice} TON</div>
-            </div>
-            {collection.endTime && (
-              <div className="flex items-center justify-between p-3">
-                <div className="text-muted-foreground">Time Left</div>
-                <div>
-                  <Countdown endTime={collection.endTime} />
+                <div className="flex items-center justify-between p-3">
+                  <div className="text-muted-foreground">Price</div>
+                  <div>{collection.nftPrice} TON</div>
                 </div>
-              </div>
+                {collection.endTime && (
+                  <div className="flex items-center justify-between p-3">
+                    <div className="text-muted-foreground">Time Left</div>
+                    <div>
+                      <Countdown time={collection.endTime} />
+                    </div>
+                  </div>
+                )}
+              </Card>
+            </section>
+            {userAddress && (
+              <QuantityField
+                nftPrice={collection.nftPrice}
+                onQuantityChange={(value) => setQuantity(value)}
+              />
             )}
-          </Card>
-        </section>
-        {userAddress && (
-          <QuantityField
-            nftPrice={collection.nftPrice}
-            onQuantityChange={(value) => setQuantity(value)}
-          />
-        )}
-        {!userAddress && (
-          <section className="flex flex-col text-center items-center gap-4 mt-auto pb-16">
-            <p className="text-muted-foreground text-sm px-24">
-              To make a purchase, you need to connect a TON wallet.
-            </p>
-            <TonConnectButton />
-          </section>
+            {!userAddress && (
+              <section className="flex flex-col text-center items-center gap-4 mt-auto pb-16">
+                <p className="text-muted-foreground text-sm px-24">
+                  To make a purchase, you need to connect a TON wallet.
+                </p>
+                <TonConnectButton />
+              </section>
+            )}
+          </>
         )}
       </div>
     )

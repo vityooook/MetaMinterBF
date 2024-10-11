@@ -28,13 +28,13 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
           className="w-10 h-10 rounded-lg"
         />
         <div className="flex-grow flex flex-col justify-between">
-          <div className="text-lg font-semibold">{collection.name}</div>
+          <div className="text-lg font-semibold truncate max-w-full overflow-hidden">{collection.name}</div>
           <div className="text-sm text-gray-500">
             {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit} items
           </div>
         </div>
         <div className="text-right flex flex-col justify-between">
-          <div className="text-lg font-semibold">
+          <div className="text-lg font-semibold truncate max-w-full overflow-hidden">
             {collection.nftPrice} TON
           </div>
           {toncoinPrice && (

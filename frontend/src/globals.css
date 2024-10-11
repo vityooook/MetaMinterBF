@@ -100,3 +100,10 @@
     color: hsl(0, 0%, 0%);
   }
 }
+
+input[type="datetime-local"], input[type="number"] {
+  /* Remove default styling */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
