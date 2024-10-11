@@ -8,19 +8,19 @@ import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
 import { Button } from "~/components/ui/button";
-import { MinusIcon, PlusIcon, ShareIcon, XIcon } from "lucide-react";
+import { ShareIcon, XIcon } from "lucide-react";
 import {
   TonConnectButton,
   useTonAddress,
   useTonConnectUI,
 } from "@tonconnect/ui-react";
-import { Input } from "~/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCollectionById } from "~/api/backend";
-import { Footer } from "~/components/footer";
 import { toast } from "~/components/ui/use-toast";
 import { CollectionContract } from "~/contracts/collection";
 import { address } from "@ton/core";
+import { Countdown } from "~/components/countdown";
+import { QuantityField } from "./ui/quantity-field";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -51,6 +51,14 @@ export const CollectionMintPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [tonConnect] = useTonConnectUI();
   const collectionContract = new CollectionContract();
+
+  const { data: collectionData } = useQuery({
+    queryKey: ["collectionData"],
+    queryFn: async () => {
+      return await collectionContract.getData(address(collection?.address!));
+    },
+    enabled: !!collection,
+  });
 
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
@@ -84,22 +92,18 @@ export const CollectionMintPage: React.FC = () => {
   }, [utils, collection]);
 
   useEffect(() => {
-    if (collection?.address) {
-      collectionContract.getData(address(collection.address)).then((data) => {
-        console.log({
-          owner: data
-        });
-      });
-    }
-  }, [collectionContract]);
-
-  useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");
   }, [miniApp]);
 
   useEffect(() => {
     if (userAddress) {
-      mb.show().enable();
+      mb.show();
+
+      if(quantity === 0) {
+        mb.disable();
+      } else {
+        mb.enable();
+      }
 
       if (collection?.deployed) {
         mb.setText("Mint NFT").on("click", handleBuy);
@@ -184,8 +188,9 @@ export const CollectionMintPage: React.FC = () => {
               </div>
             )}
             <div className="flex items-center justify-between p-3 border-b border-border">
-              <div className="text-muted-foreground">Items</div>
+              <div className="text-muted-foreground">Total Minted</div>
               <div>
+                {collectionData?.totalMinted || 0} /{" "}
                 {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit}
               </div>
             </div>
@@ -193,37 +198,21 @@ export const CollectionMintPage: React.FC = () => {
               <div className="text-muted-foreground">Price</div>
               <div>{collection.nftPrice} TON</div>
             </div>
+            {collection.endTime && (
+              <div className="flex items-center justify-between p-3">
+                <div className="text-muted-foreground">Time Left</div>
+                <div>
+                  <Countdown endTime={collection.endTime} />
+                </div>
+              </div>
+            )}
           </Card>
         </section>
         {userAddress && (
-          <div className="flex items-center px-20">
-            <Button
-              onClick={() => setQuantity(Number(quantity) - 1)}
-              size="icon"
-              variant="ghost"
-              className=" bg-card min-w-10"
-            >
-              <MinusIcon className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center flex-col gap-1">
-              <Input
-                onChange={(e) => setQuantity(e.target.value as any)}
-                value={quantity}
-                className="bg-transparent border-none text-4xl text-center"
-              />
-              <span className="text-muted-foreground">
-                {collection.nftPrice * quantity} TON
-              </span>
-            </div>
-            <Button
-              onClick={() => setQuantity(Number(quantity) + 1)}
-              size="icon"
-              variant="ghost"
-              className=" bg-card min-w-10"
-            >
-              <PlusIcon className="w-5 h-5" />
-            </Button>
-          </div>
+          <QuantityField
+            nftPrice={collection.nftPrice}
+            onQuantityChange={(value) => setQuantity(value)}
+          />
         )}
         {!userAddress && (
           <section className="flex flex-col text-center items-center gap-4 mt-auto pb-16">
@@ -233,7 +222,6 @@ export const CollectionMintPage: React.FC = () => {
             <TonConnectButton />
           </section>
         )}
-        <Footer />
       </div>
     )
   );

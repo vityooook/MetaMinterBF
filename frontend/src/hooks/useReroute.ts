@@ -13,13 +13,16 @@ export const useReroute = () => {
   useEffect(() => {
     if (launchParams.startParam) {
       if (launchParams.startParam?.includes("nft")) {
+        
         const collectionId = launchParams.startParam.split("nft-")[1];
 
-        if (user.isOnboarded) {
-          navigate(`/collections/${collectionId}/mint`);
-        } else {
-          window.localStorage.setItem(REDIRECT_KEY, `/collections/${collectionId}/mint`);
-        }
+        navigate(`/collections/${collectionId}/mint`);
+
+        // if (user.isOnboarded) {
+          
+        // } else {
+        //   window.localStorage.setItem(REDIRECT_KEY, `/collections/${collectionId}/mint`);
+        // }
       }
     }
   }, [user]);

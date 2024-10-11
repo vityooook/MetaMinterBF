@@ -17,7 +17,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "~/components/ui/button";
 import { useMainButton } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 
@@ -121,7 +120,6 @@ export const CollectionForm = () => {
         />
 
         <LinksField form={form} label="Links" />
-        <Button>next</Button>
       </form>
     </Form>
   );

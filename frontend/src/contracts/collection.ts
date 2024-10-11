@@ -5,7 +5,12 @@ import {
   MASTER_ADDRESS,
   config,
 } from "~/config";
-import { CollectionPayload, generateCollectionPayload } from "~/lib/ton";
+import {
+  CollectionPayload,
+  decodeContentItem,
+  decodeOffChainContent,
+  generateCollectionPayload,
+} from "~/lib/ton";
 import { ActionConfiguration, TonConnectUI } from "@tonconnect/ui-react";
 import { CollectionModel } from "~/db/models";
 import { getTonClient } from "~/lib/ton-client";
@@ -49,15 +54,34 @@ export class CollectionContract implements CollectionContractActions {
       client.runMethod(collectionAddress, "get_collection_data", [])
     );
 
-    const numberOfNFTs = response.stack.readNumber();
-    const collectionContent = response.stack.readCell();
-    const ownerAddress = response.stack.readAddressOpt();
+    const owner_user = response.stack.readAddress();
+    const admin = response.stack.readAddress();
+    const available = response.stack.readBoolean();
+    const price = response.stack.readBigNumber();
+    const totalMinted = response.stack.readNumber();
+    const buyerLimit = response.stack.readNumber();
+    const startTime = response.stack.readNumber();
+    const endTime = response.stack.readNumber();
+    const comission = response.stack.readBigNumber();
+    const contentCollection = decodeOffChainContent(response.stack.readCell());
+    const contentItem = decodeContentItem(response.stack.readCell());
 
-    return { numberOfNFTs, collectionContent, ownerAddress };
+    return {
+      owner_user,
+      admin,
+      available,
+      price,
+      totalMinted,
+      buyerLimit,
+      startTime,
+      endTime,
+      comission,
+      contentCollection,
+      contentItem,
+    };
   }
 
   async deploy({ tonConnect, userAddress, collection }: SendCollectionData) {
-    console.log(collection.startTime, Number(new Date(collection.startTime!).getTime()))
     const payload = await generateCollectionPayload({
       nftCollectionCodeHex: NFT_COLLECTION_CODE_HEX,
       nftItemCodeHex: NFT_ITEM_CODE_HEX,

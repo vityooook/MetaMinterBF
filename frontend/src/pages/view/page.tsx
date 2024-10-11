@@ -12,6 +12,7 @@ import { Badge } from "~/components/ui/badge";
 import SocialLogo from "~/components/socia-logo";
 import { CollectionContract } from "~/contracts/collection";
 import { useDeployMutation } from "../create/hooks/useDeployMutation";
+import { ConfirmDeploy } from "./steps/confirm";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -33,9 +34,11 @@ export const CollectionViewPage: React.FC = () => {
   const userAddress = useTonAddress();
   const collectionContract = new CollectionContract();
   const deployCollection = useDeployMutation();
+
   const collection = useCollectionStore((state) =>
     state.getCollection(collectionId!)
   );
+
   const [isDeploying, setIsDeploying] = useState(false);
 
   const handleDeploy = useCallback(async () => {
@@ -102,7 +105,7 @@ export const CollectionViewPage: React.FC = () => {
     };
   }, [mb, collection, navigate, handleShare, handleDeploy]);
 
-  return (
+  return isDeploying ? <ConfirmDeploy /> : (
     collection && (
       <div className="-mt-4 -mx-4">
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
@@ -169,6 +172,7 @@ export const CollectionViewPage: React.FC = () => {
             </div>
           </Card>
         </section>
+
       </div>
     )
   );

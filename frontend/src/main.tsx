@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { TmaProvider } from "./providers/tma-provider.tsx";
 import { QueryProvider } from "./providers/query-provider.tsx";
+import "./polyfills.ts";
 
 import "./globals.css";
 import { I18nextProvider } from "react-i18next";

@@ -52,7 +52,6 @@ export class NftService {
 
     const response = {
       ...plainCollection,
-      deployed: true,
       nfts: savedNfts.map((nft) => ({
         _id: nft._id.toString(),
         name: nft.name,

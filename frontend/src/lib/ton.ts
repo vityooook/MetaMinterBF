@@ -173,3 +173,10 @@ export async function generateCollectionPayload(args: {
 
   return { address, stateInitBase64 };
 }
+
+
+export function decodeContentItem(cell: Cell): string {
+  const slice = cell.beginParse(); // Создаём Slice для работы с ячейкой
+  const buffer = slice.loadBuffer(slice.remainingBits / 8); // Извлекаем буфер (размер в байтах)
+  return buffer.toString("utf-8"); // Преобразуем Buffer в строку
+}
