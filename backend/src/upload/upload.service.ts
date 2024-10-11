@@ -1,18 +1,24 @@
 import { Injectable } from "@nestjs/common";
-import { S3 } from "aws-sdk";
+import {
+  S3Client,
+  PutObjectCommand,
+  ObjectCannedACL,
+} from "@aws-sdk/client-s3";
 import * as multer from "multer";
 import * as sharp from "sharp";
 import { createHash } from "crypto";
 
 @Injectable()
 export class UploadService {
-  private s3: S3;
+  private s3Client: S3Client;
 
   constructor() {
-    this.s3 = new S3({
+    this.s3Client = new S3Client({
       endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
-      accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY_ID,
-      secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY,
+      credentials: {
+        accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY_ID,
+        secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY,
+      },
       region: "auto",
     });
   }
@@ -35,16 +41,22 @@ export class UploadService {
       .digest("hex")
       .substring(0, 8);
 
-    const uploadResult = await this.s3
-      .upload({
-        Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
-        Key: `user-media/${date}/${userId}/${hash}.webp`,
-        Body: webpBuffer,
-        ContentType: "image/webp",
-        ACL: "public-read",
-      })
-      .promise();
+    const params = {
+      Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
+      Key: `user-media/${date}/${userId}/${hash}.webp`,
+      Body: webpBuffer,
+      ContentType: "image/webp",
+      ACL: ObjectCannedACL.public_read, // Use the enum for 'public-read'
+    };
 
-    return `${process.env.CLOUDFLARE_DOMAIN}${uploadResult.Key}`;
+    const command = new PutObjectCommand(params);
+
+    try {
+      const uploadResult = await this.s3Client.send(command);
+      return `${process.env.CLOUDFLARE_DOMAIN}${params.Key}`;
+    } catch (error) {
+      console.error("Error uploading to S3:", error);
+      throw error;
+    }
   }
 }

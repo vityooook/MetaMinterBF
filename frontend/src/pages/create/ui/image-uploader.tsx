@@ -126,7 +126,7 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
             backgroundPosition: "center",
           }}
         >
-          {!preview && <PlusIcon className="w-8 h-8" />}
+          {!preview && !mutation.isPending && <PlusIcon className="w-8 h-8" />}
           {mutation.isPending && (
             <div className="w-fit rounded-full bg-background">
               <Loader2 className="w-10 h-10 animate-spin" />
