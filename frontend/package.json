@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.24.8",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@hookform/resolvers": "^3.9.0",
     "@mapbox/mapbox-sdk": "^0.16.0",
     "@mui/base": "^5.0.0-beta.40",
