@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "./app";
 import { CollectionPage } from "./pages/collections/page";
 import { CollectionCreatePage } from "./pages/create/page";
-import { CollectionMintedPage } from "./pages/mint/minted/page";
 import { CollectionMintPage } from "./pages/mint/page";
 import { WelcomePage } from "./pages/welcome/page";
 import { CollectionForm } from "./pages/create/steps/collection";
@@ -32,10 +31,6 @@ export const router = createBrowserRouter([
       {
         path: "/collections/:collectionId/mint",
         element: <CollectionMintPage />,
-      },
-      {
-        path: "/collections/:collectionId/minted",
-        element: <CollectionMintedPage />,
       },
     ],
   },

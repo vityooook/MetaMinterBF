@@ -42,12 +42,13 @@ export const CollectionForm = () => {
       image: formData.image,
       name: formData.name,
       description: formData.description,
-      links: []
+      links: [],
     },
   });
 
   const handleSubmit = useCallback(
     (data: FormData) => {
+      console.log("COLLECTION");
       setFormData(data, "nft");
       navigate("/collections/create/nft");
     },
@@ -55,13 +56,11 @@ export const CollectionForm = () => {
   );
 
   useEffect(() => {
-    mb.show()
-      .enable()
-      .setText("Continue")
-      .on("click", form.handleSubmit(handleSubmit));
+    const onClick = form.handleSubmit(handleSubmit);
+    mb.show().enable().setText("Continue").on("click", onClick);
 
     return () => {
-      mb.hide().off("click", form.handleSubmit(handleSubmit));
+      mb.hide().off("click", onClick);
     };
   }, [mb]);
 

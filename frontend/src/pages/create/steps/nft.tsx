@@ -41,7 +41,6 @@ export const NftForm = () => {
 
   const handleSubmit = useCallback(
     (data: FormData) => {
-      console.log(data);
       setFormData(data, "settings");
       navigate("/collections/create/settings");
     },
@@ -49,13 +48,12 @@ export const NftForm = () => {
   );
 
   useEffect(() => {
-    mb.show()
-      .enable()
-      .setText("Continue")
-      .on("click", form.handleSubmit(handleSubmit));
+    const onClick = form.handleSubmit(handleSubmit);
+
+    mb.show().enable().setText("Continue").on("click", onClick);
 
     return () => {
-      mb.hide().off("click", form.handleSubmit(handleSubmit));
+      mb.hide().off("click", onClick);
     };
   }, [mb]);
 

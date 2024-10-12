@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Card } from "~/components/ui/card";
 import { formatDateToLocal, minifyAddress } from "~/lib/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
@@ -28,7 +28,6 @@ export const CollectionViewPage: React.FC = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const miniApp = useMiniApp();
   const mb = useMainButton();
-  const navigate = useNavigate();
   const utils = useUtils();
   const [tonConnect] = useTonConnectUI();
   const userAddress = useTonAddress();
@@ -42,7 +41,7 @@ export const CollectionViewPage: React.FC = () => {
   const [isDeploying, setIsDeploying] = useState(false);
 
   const handleDeploy = useCallback(async () => {
-    if (!userAddress) {
+    if (!userAddress && tonConnect.modalState.status !== "opened") {
       return tonConnect.openModal();
     }
 
@@ -83,27 +82,42 @@ export const CollectionViewPage: React.FC = () => {
   }, [miniApp]);
 
   useEffect(() => {
-    if (isDeploying) {
-      mb.disable().setText("Deploying");
-    } else {
-      mb.enable().setText("Deploy Collection");
-    }
-  }, [mb, isDeploying]);
-
-  useEffect(() => {
-    mb.show().enable();
+    const onShare = handleShare;
 
     if (collection?.deployed) {
-      mb.setText("Share Collection").on("click", handleShare);
-    } else {
-      mb.setText("Deploy Collection").on("click", handleDeploy);
+      mb.show().enable().setText("Share Collection").on("click", onShare);
     }
 
     return () => {
-      mb.hide().off("click", handleShare);
-      mb.off("click", handleDeploy);
+      mb.hide().off("click", onShare);
     };
-  }, [mb, collection, navigate, handleShare, handleDeploy]);
+  }, [mb, collection, handleShare]);
+
+  useEffect(() => {
+    const onDeploy = handleDeploy;
+
+    if (collection?.deployed) {
+      mb.hide().off("click", onDeploy);
+      return;
+    }
+
+    mb.show()
+      .enable()
+      .setText(userAddress ? "Deploy Collection" : "Connect Wallet")
+      .on("click", onDeploy);
+
+    return () => {
+      mb.hide().off("click", onDeploy);
+    };
+  }, [mb, collection, userAddress, handleDeploy]);
+
+  useEffect(() => {
+    if (isDeploying) {
+      mb.hide();
+    } else {
+      mb.show();
+    }
+  }, [isDeploying]);
 
   return isDeploying ? (
     <ConfirmDeploy />

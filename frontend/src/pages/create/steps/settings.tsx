@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { Input } from "~/components/ui/input";
 import {
@@ -14,7 +13,6 @@ import { createCollectionSchema } from "../zod";
 import { useCallback, useEffect, useState, ChangeEvent } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
 import { useFormStore } from "../store";
 import { useMainButton } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
@@ -32,8 +30,8 @@ export type FormData = z.infer<typeof formSchema>;
 export const SettingsForm = () => {
   useBack("../");
 
-  const { set: setFormData, reset: resetFormData, formData } = useFormStore();
-  const navigate = useNavigate();
+  const { formData } = useFormStore();
+
   const mb = useMainButton();
   const createCollection = useCreateMutation();
 
@@ -45,18 +43,15 @@ export const SettingsForm = () => {
   const handleSubmit = useCallback(
     async (data: FormData) => {
       try {
-        setFormData(data, "finish");
-        const nftCollection = await createCollection.mutateAsync({
+        await createCollection.mutateAsync({
           ...formData,
           ...data,
         });
-        resetFormData();
-        navigate(`/collections/${nftCollection._id}`);
       } catch (e) {
         console.log(e);
       }
     },
-    [navigate, resetFormData, setFormData]
+    [createCollection]
   );
 
   const [fromDate, setFromDate] = useState<string>("");
@@ -68,13 +63,11 @@ export const SettingsForm = () => {
   };
 
   useEffect(() => {
-    mb.show()
-      .enable()
-      .setText("Continue")
-      .on("click", form.handleSubmit(handleSubmit));
+    const onClick = form.handleSubmit(handleSubmit);
+    mb.enable().setText("Continue").show().on("click", onClick);
 
     return () => {
-      mb.hide().off("click", form.handleSubmit(handleSubmit));
+      mb.hide().off("click", onClick);
     };
   }, [mb]);
 
@@ -93,7 +86,6 @@ export const SettingsForm = () => {
                   type="input"
                   inputMode="decimal"
                   {...field}
-
                   onChange={(event: ChangeEvent<HTMLInputElement>) => {
                     const value = event.target.value;
                     const decimalRegex =
@@ -126,7 +118,6 @@ export const SettingsForm = () => {
                   pattern="\d*"
                   inputMode="decimal"
                   {...field}
-                  
                 />
               </FormControl>
               <FormDescription>
