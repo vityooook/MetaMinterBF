@@ -52,18 +52,22 @@ prepare_production:
       - TYPE_SERVER: [frontend, backend]
   script:
     - mkdir -p /kaniko/.docker
-    - echo '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}' > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - |
-      DESTINATION_TAGS="${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:${CI_COMMIT_SHA}"
+      REPO_NAME=$(echo "$CI_PROJECT_PATH" | tr '[:upper:]' '[:lower:]')
+      IMAGE_NAME="$CI_REGISTRY/$REPO_NAME-$TYPE_SERVER"
+      DESTINATION_TAGS="$IMAGE_NAME:$CI_COMMIT_SHA"
       if [[ "$CI_COMMIT_BRANCH" == "main" ]]; then
-        DESTINATION_TAGS="$DESTINATION_TAGS,${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:latest"
+        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:latest"
       elif [[ "$CI_COMMIT_BRANCH" == "dev" ]]; then
-        DESTINATION_TAGS="$DESTINATION_TAGS,${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:test"
+        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:test"
       fi
+      echo "Destination tags: $DESTINATION_TAGS"
       /kaniko/executor \
         --context "${CI_PROJECT_DIR}" \
         --dockerfile "${CI_PROJECT_DIR}/Dockerfile-${TYPE_SERVER}" \
-        --destination "$DESTINATION_TAGS" \
+        --destination "$IMAGE_NAME:$CI_COMMIT_SHA" \
+        $(for tag in $DESTINATION_TAGS; do echo "--destination $tag"; done) \
         --build-arg "TYPE_SERVER=${TYPE_SERVER}"
 
 build_development:
