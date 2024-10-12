@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import {
   S3Client,
   PutObjectCommand,
@@ -30,8 +30,26 @@ export class UploadService {
   }
 
   public async uploadImageToR2(file: Express.Multer.File, userId: string) {
-    const webpBuffer = await sharp(file.buffer)
-      .webp({ quality: 80 })
+    // Проверяем формат файла
+    const supportedFormats = ["jpeg", "jpg", "png"];
+    const fileExtension = file.originalname.split(".").pop().toLowerCase();
+
+    if (!supportedFormats.includes(fileExtension)) {
+      throw new BadRequestException(
+        `Unsupported file format. Only ${supportedFormats.join(", ")} are allowed.`,
+      );
+    }
+
+    // Обрабатываем изображение, добавляем автоориентацию и рекомендуем размер
+    const recommendedSize = 512; // Рекомендуемый размер 512x512 пикселей
+
+    const imageBuffer = await sharp(file.buffer)
+      .rotate() // Автоориентация изображения
+      .resize({
+        width: recommendedSize,
+        height: recommendedSize,
+        fit: sharp.fit.cover, // Принудительное приведение к квадрату 512x512
+      })
       .toBuffer();
 
     const date = new Date().toISOString().split("T")[0];
@@ -43,9 +61,9 @@ export class UploadService {
 
     const params = {
       Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
-      Key: `user-media/${date}/${userId}/${hash}.webp`,
-      Body: webpBuffer,
-      ContentType: "image/webp",
+      Key: `user-media/${date}/${userId}/${hash}.${fileExtension}`,
+      Body: imageBuffer,
+      ContentType: `image/${fileExtension}`,
       ACL: ObjectCannedACL.public_read, // Use the enum for 'public-read'
     };
 
