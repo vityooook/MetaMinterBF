@@ -2,26 +2,48 @@ stages:
   - prepare
   - build
 
-prepare:
-  stage: prepare
+.prepare_template: &prepare_template
   tags:
     - bf-docker
-  only:
-    - branches
   image: alpine:latest
   script:
     - apk add --no-cache gettext
-    - envsubst < $DEV_FRONTEND_ENV_FILE > ${CI_PROJECT_DIR}/frontend/.env
+    - |
+      if [ -z "$FRONTEND_ENV_FILE" ]; then
+        echo "Error: FRONTEND_ENV_FILE is not set"
+        exit 1
+      fi
+    - |
+      echo "Contents of FRONTEND_ENV_FILE:"
+      cat $FRONTEND_ENV_FILE
+    - envsubst < $FRONTEND_ENV_FILE > ${CI_PROJECT_DIR}/frontend/.env
+    - |
+      echo "Contents of generated .env file:"
+      cat ${CI_PROJECT_DIR}/frontend/.env
   artifacts:
     paths:
       - ${CI_PROJECT_DIR}/frontend/.env
 
-build:
+prepare_development:
+  stage: prepare
+  environment:
+    name: development
+  <<: *prepare_template
+  only:
+    - dev
+
+prepare_production:
+  stage: prepare
+  environment:
+    name: production
+  <<: *prepare_template
+  only:
+    - main
+
+.build_template: &build_template
   stage: build
   tags:
     - bf-docker
-  only:
-    - branches
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -30,10 +52,32 @@ build:
       - TYPE_SERVER: [frontend, backend]
   script:
     - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - echo '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}' > /kaniko/.docker/config.json
     - |
+      DESTINATION_TAGS="${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:${CI_COMMIT_SHA}"
+      if [[ "$CI_COMMIT_BRANCH" == "main" ]]; then
+        DESTINATION_TAGS="$DESTINATION_TAGS,${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:latest"
+      elif [[ "$CI_COMMIT_BRANCH" == "dev" ]]; then
+        DESTINATION_TAGS="$DESTINATION_TAGS,${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:test"
+      fi
       /kaniko/executor \
         --context "${CI_PROJECT_DIR}" \
         --dockerfile "${CI_PROJECT_DIR}/Dockerfile-${TYPE_SERVER}" \
-        --destination "${CI_REGISTRY_IMAGE}/${CI_PROJECT_NAME}-${TYPE_SERVER}:${CI_COMMIT_BRANCH}" \
+        --destination "$DESTINATION_TAGS" \
         --build-arg "TYPE_SERVER=${TYPE_SERVER}"
+
+build_development:
+  stage: build
+  environment:
+    name: development
+  <<: *build_template
+  only:
+    - dev
+
+build_production:
+  stage: build
+  environment:
+    name: production
+  <<: *build_template
+  only:
+    - main
