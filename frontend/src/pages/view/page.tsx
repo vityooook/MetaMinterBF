@@ -201,7 +201,6 @@ export const CollectionViewPage: React.FC = () => {
             </div>
           </Card>
         </section>
-        <Link to={`/collections/${collection._id}/mint`}>Mint</Link>
       </div>
     )
   );
