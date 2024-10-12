@@ -52,7 +52,7 @@ prepare_production:
       - TYPE_SERVER: [frontend, backend]
   script:
     - mkdir -p /kaniko/.docker
-    - echo '{"auths":{"$CI_REGISTRY":{"username":"$CI_REGISTRY_USER","password":"$CI_REGISTRY_PASSWORD"}}}' > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - |
       REPO_NAME=$(echo "$CI_PROJECT_PATH" | tr '[:upper:]' '[:lower:]')
       IMAGE_NAME="$CI_REGISTRY/$REPO_NAME-$TYPE_SERVER"
