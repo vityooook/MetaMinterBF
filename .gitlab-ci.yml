@@ -1,3 +1,8 @@
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
+
 stages:
   - prepare
   - build
@@ -100,24 +105,30 @@ build_production:
   script:
     - mkdir -p ~/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > ~/.docker/config.json
-    - echo "JWT_ALGORITHM=$JWT_ALGORITHM" > .env
-    - echo "JWT_EXPIRES_IN=$JWT_EXPIRES_IN" >> .env
-    - echo "JWT_SECRET=$JWT_SECRET" >> .env
-    - echo "BOT_TOKEN=$BOT_TOKEN" >> .env
-    - echo "BOT_NAME=$BOT_NAME" >> .env
-    - echo "NODE_ENV=$NODE_ENV" >> .env
-    - echo "DATABASE_PATH=$DATABASE_PATH" >> .env
-    - echo "BRANCH_NAME=$CI_COMMIT_BRANCH" >> .env
-    - echo "IMAGE_NAME=$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME" >> .env
-    - echo "PROJECT_URL=$PROJECT_URL" >> .env
-    - echo "SERVICE_NAME=$CI_PROJECT_NAME" >> .env
-    - echo "CLOUDFLARE_DOMAIN=$CLOUDFLARE_DOMAIN" >> .env
-    - echo "CLOUDFLARE_ACCESS_KEY_ID=$CLOUDFLARE_ACCESS_KEY_ID" >> .env
-    - echo "CLOUDFLARE_SECRET_ACCESS_KEY=$CLOUDFLARE_SECRET_ACCESS_KEY" >> .env
-    - echo "CLOUDFLARE_BUCKET_NAME=$CLOUDFLARE_BUCKET_NAME" >> .env
-    - echo "CLOUDFLARE_R2_ENDPOINT=$CLOUDFLARE_R2_ENDPOINT" >> .env
-    - docker-compose pull
-    - docker-compose up -d
+    - |
+      cat << EOF > .env
+      JWT_ALGORITHM=$JWT_ALGORITHM
+      JWT_EXPIRES_IN=$JWT_EXPIRES_IN
+      JWT_SECRET=$JWT_SECRET
+      BOT_TOKEN=$BOT_TOKEN
+      BOT_NAME=$BOT_NAME
+      NODE_ENV=$NODE_ENV
+      DATABASE_PATH=$DATABASE_PATH
+      BRANCH_NAME=$CI_COMMIT_BRANCH
+      IMAGE_NAME=$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME
+      PROJECT_URL=$PROJECT_URL
+      SERVICE_NAME=$CI_PROJECT_NAME
+      CLOUDFLARE_DOMAIN=$CLOUDFLARE_DOMAIN
+      CLOUDFLARE_ACCESS_KEY_ID=$CLOUDFLARE_ACCESS_KEY_ID
+      CLOUDFLARE_SECRET_ACCESS_KEY=$CLOUDFLARE_SECRET_ACCESS_KEY
+      CLOUDFLARE_BUCKET_NAME=$CLOUDFLARE_BUCKET_NAME
+      CLOUDFLARE_R2_ENDPOINT=$CLOUDFLARE_R2_ENDPOINT
+      EOF
+    - chmod 600 .env
+    - docker info
+    - docker compose pull
+    - docker compose up -d
+    - shred -u .env
 
 deploy_development:
   stage: deploy
