@@ -101,10 +101,9 @@ build_production:
 .deploy_template: &deploy_template
   stage: deploy
   tags:
-    - ad-docker
+    - ad-docker-shell
   script:
-    - mkdir -p ~/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > ~/.docker/config.json
+    - mkdir -p $DATABASE_PATH/$CI_COMMIT_BRANCH
     - |
       cat << EOF > .env
       JWT_ALGORITHM=$JWT_ALGORITHM
