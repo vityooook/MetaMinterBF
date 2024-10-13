@@ -1,8 +1,9 @@
 stages:
   - prepare
   - build
+  - deploy
 
-.prepare_template: &prepare_template
+.prepare_template:
   tags:
     - bf-docker
   image: alpine:latest
@@ -40,7 +41,7 @@ prepare_production:
   only:
     - main
 
-.build_template: &build_template
+.build_template:
   stage: build
   tags:
     - bf-docker
@@ -59,9 +60,9 @@ prepare_production:
       SHORT_SHA=${CI_COMMIT_SHA:0:8}
       DESTINATION_TAGS="$IMAGE_NAME:$SHORT_SHA"
       if [[ "$CI_COMMIT_BRANCH" == "main" ]]; then
-        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:latest"
+        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:$CI_COMMIT_BRANCH $IMAGE_NAME:latest"
       elif [[ "$CI_COMMIT_BRANCH" == "dev" ]]; then
-        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:test"
+        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:$CI_COMMIT_BRANCH $IMAGE_NAME:test"
       fi
       echo "Destination tags: $DESTINATION_TAGS"
       echo "CI_REGISTRY: $CI_REGISTRY"
@@ -89,5 +90,47 @@ build_production:
   environment:
     name: production
   <<: *build_template
+  only:
+    - main
+
+.deploy_template:
+  stage: deploy
+  tags:
+    - ad-docker
+  script:
+    - mkdir -p ~/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > ~/.docker/config.json
+    - echo "JWT_ALGORITHM=$JWT_ALGORITHM" > .env
+    - echo "JWT_EXPIRES_IN=$JWT_EXPIRES_IN" >> .env
+    - echo "JWT_SECRET=$JWT_SECRET" >> .env
+    - echo "BOT_TOKEN=$BOT_TOKEN" >> .env
+    - echo "BOT_NAME=$BOT_NAME" >> .env
+    - echo "NODE_ENV=$NODE_ENV" >> .env
+    - echo "DATABASE_PATH=$DATABASE_PATH" >> .env
+    - echo "BRANCH_NAME=$CI_COMMIT_BRANCH" >> .env
+    - echo "IMAGE_NAME=$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME" >> .env
+    - echo "PROJECT_URL=$PROJECT_URL" >> .env
+    - echo "SERVICE_NAME=$CI_PROJECT_NAME" >> .env
+    - echo "CLOUDFLARE_DOMAIN=$CLOUDFLARE_DOMAIN" >> .env
+    - echo "CLOUDFLARE_ACCESS_KEY_ID=$CLOUDFLARE_ACCESS_KEY_ID" >> .env
+    - echo "CLOUDFLARE_SECRET_ACCESS_KEY=$CLOUDFLARE_SECRET_ACCESS_KEY" >> .env
+    - echo "CLOUDFLARE_BUCKET_NAME=$CLOUDFLARE_BUCKET_NAME" >> .env
+    - echo "CLOUDFLARE_R2_ENDPOINT=$CLOUDFLARE_R2_ENDPOINT" >> .env
+    - docker-compose pull
+    - docker-compose up -d
+
+deploy_development:
+  stage: deploy
+  environment:
+    name: development
+  <<: *deploy_template
+  only:
+    - dev
+
+deploy_production:
+  stage: deploy
+  environment:
+    name: production
+  <<: *deploy_template
   only:
     - main
