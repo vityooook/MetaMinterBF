@@ -3,7 +3,7 @@ stages:
   - build
   - deploy
 
-.prepare_template:
+.prepare_template: &prepare_template
   tags:
     - bf-docker
   image: alpine:latest
@@ -41,7 +41,7 @@ prepare_production:
   only:
     - main
 
-.build_template:
+.build_template: &build_template
   stage: build
   tags:
     - bf-docker
@@ -93,7 +93,7 @@ build_production:
   only:
     - main
 
-.deploy_template:
+.deploy_template: &deploy_template
   stage: deploy
   tags:
     - ad-docker
