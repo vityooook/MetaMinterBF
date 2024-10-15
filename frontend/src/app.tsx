@@ -6,6 +6,7 @@ import {
   useMainButton,
   useMiniApp,
   useThemeParams,
+  useViewport,
 } from "@telegram-apps/sdk-react";
 import { useEffect } from "react";
 import { Toaster } from "~/components/ui/toaster";
@@ -24,6 +25,7 @@ function App() {
   const themeParams = useThemeParams();
   const miniApp = useMiniApp();
   const mb = useMainButton();
+  const viewport = useViewport();
 
   useEffect(() => {
     mb.setBgColor("#20d2df").setTextColor("#000000");
@@ -45,6 +47,10 @@ function App() {
     miniApp.ready();
     miniApp.requestWriteAccess();
   }, []);
+
+  useEffect(() => {
+    viewport?.expand();
+  }, [viewport]);
 
   return (
     <div className="container max-w-xl py-4">
