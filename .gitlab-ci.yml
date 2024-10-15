@@ -1,6 +1,7 @@
 stages:
   - prepare
   - build
+  - deploy
 
 .prepare_template: &prepare_template
   tags:
@@ -55,20 +56,26 @@ prepare_production:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - |
       REPO_NAME=$(echo "$CI_PROJECT_PATH" | tr '[:upper:]' '[:lower:]')
-      IMAGE_NAME="$CI_REGISTRY/$REPO_NAME-$TYPE_SERVER"
-      DESTINATION_TAGS="$IMAGE_NAME:$CI_COMMIT_SHA"
+      IMAGE_NAME="$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME-$TYPE_SERVER"
+      SHORT_SHA=${CI_COMMIT_SHA:0:8}
+      DESTINATION_TAGS="$IMAGE_NAME:$SHORT_SHA"
       if [[ "$CI_COMMIT_BRANCH" == "main" ]]; then
-        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:latest"
+        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:$CI_COMMIT_BRANCH $IMAGE_NAME:latest"
       elif [[ "$CI_COMMIT_BRANCH" == "dev" ]]; then
-        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:test"
+        DESTINATION_TAGS="$DESTINATION_TAGS $IMAGE_NAME:$CI_COMMIT_BRANCH $IMAGE_NAME:test"
       fi
       echo "Destination tags: $DESTINATION_TAGS"
+      echo "CI_REGISTRY: $CI_REGISTRY"
+      echo "CI_REGISTRY_USER: $CI_REGISTRY_USER"
+      echo "CI_REGISTRY_PASSWORD: ********"
+    - |
       /kaniko/executor \
         --context "${CI_PROJECT_DIR}" \
         --dockerfile "${CI_PROJECT_DIR}/Dockerfile-${TYPE_SERVER}" \
-        --destination "$IMAGE_NAME:$CI_COMMIT_SHA" \
+        --destination "$IMAGE_NAME:$SHORT_SHA" \
         $(for tag in $DESTINATION_TAGS; do echo "--destination $tag"; done) \
-        --build-arg "TYPE_SERVER=${TYPE_SERVER}"
+        --build-arg "TYPE_SERVER=${TYPE_SERVER}" \
+        --cleanup
 
 build_development:
   stage: build
@@ -83,5 +90,50 @@ build_production:
   environment:
     name: production
   <<: *build_template
+  only:
+    - main
+
+.deploy_template: &deploy_template
+  stage: deploy
+  tags:
+    - ad-docker-shell
+  script:
+    - mkdir -p $DATABASE_PATH/$CI_COMMIT_BRANCH
+    - |
+      cat << EOF > .env
+      JWT_ALGORITHM="$JWT_ALGORITHM"
+      JWT_EXPIRES_IN="$JWT_EXPIRES_IN"
+      JWT_SECRET="$JWT_SECRET"
+      BOT_TOKEN="$BOT_TOKEN"
+      BOT_NAME="$BOT_NAME"
+      NODE_ENV="$NODE_ENV"
+      DATABASE_PATH="$DATABASE_PATH"
+      BRANCH_NAME="$CI_COMMIT_BRANCH"
+      IMAGE_NAME="$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME"
+      PROJECT_URL="$PROJECT_URL"
+      SERVICE_NAME="$CI_PROJECT_NAME"
+      CLOUDFLARE_DOMAIN="$CLOUDFLARE_DOMAIN"
+      CLOUDFLARE_ACCESS_KEY_ID="$CLOUDFLARE_ACCESS_KEY_ID"
+      CLOUDFLARE_SECRET_ACCESS_KEY="$CLOUDFLARE_SECRET_ACCESS_KEY"
+      CLOUDFLARE_BUCKET_NAME="$CLOUDFLARE_BUCKET_NAME"
+      CLOUDFLARE_R2_ENDPOINT="$CLOUDFLARE_R2_ENDPOINT"
+      EOF
+    - chmod 600 .env
+    - docker info
+    - docker compose pull
+    - docker compose up -d
+    - shred -u .env
+
+deploy_development:
+  environment:
+    name: development
+  <<: *deploy_template
+  only:
+    - dev
+
+deploy_production:
+  environment:
+    name: production
+  <<: *deploy_template
   only:
     - main
