@@ -9,50 +9,50 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { collectionSchema } from "../../../db/zod";
 import { useCallback, useEffect, useState, ChangeEvent } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormStore } from "../store";
 import { useMainButton } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
-import { useCreateMutation } from "../../../hooks/useCreateMutation";
+import { EditCollectionFormData, editCollectionSchema } from "../../db/zod";
+import { useEditMutation } from "../../hooks/useEditMutation";
+import { LinksField } from "~/components/links-field";
+import { useParams } from "react-router-dom";
+import { useCollectionStore } from "~/db/collectionStore";
+import { formatToLocalDateTime } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
 
-export const formSchema = collectionSchema.pick({
-  itemsLimit: true,
-  nftPrice: true,
-  startTime: true,
-  endTime: true,
-});
-
-export type FormData = z.infer<typeof formSchema>;
-
-export const SettingsForm = () => {
+export const CollectionEditPage = () => {
   useBack("../");
 
-  const { formData } = useFormStore();
-
+  const { collectionId } = useParams();
   const mb = useMainButton();
-  const createCollection = useCreateMutation();
+  const editCollection = useEditMutation();
+  const collection = useCollectionStore((state) =>
+    state.getCollection(collectionId!)
+  );
 
-  const form = useForm<FormData>({
+  const form = useForm<EditCollectionFormData>({
     mode: "onSubmit",
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(editCollectionSchema),
+    defaultValues: {
+      ...collection,
+      startTime: formatToLocalDateTime(collection?.startTime),
+      endTime: formatToLocalDateTime(collection?.endTime),
+    },
   });
 
   const handleSubmit = useCallback(
-    async (data: FormData) => {
+    async (data: EditCollectionFormData) => {
       try {
-        await createCollection.mutateAsync({
-          ...formData,
-          ...data,
-        });
+        await editCollection.mutateAsync(data);
       } catch (e) {
         console.log(e);
       }
     },
-    [createCollection]
+    [editCollection]
   );
+
+  console.log(form.getValues());
 
   const [fromDate, setFromDate] = useState<string>("");
 
@@ -74,6 +74,8 @@ export const SettingsForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <input type="hidden" {...form.register(`_id`)} />
+        <input type="hidden"  {...form.register(`ownerId`)} />
         <FormField
           control={form.control}
           name="nftPrice" // Update to handle only one item
@@ -176,6 +178,9 @@ export const SettingsForm = () => {
             Specify when the sale of the collection will start and end
           </FormDescription>
         </FormItem>
+
+        <LinksField form={form} label="Links" />
+        <Button>Submit</Button>
       </form>
     </Form>
   );

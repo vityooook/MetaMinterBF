@@ -1,12 +1,13 @@
 import { config } from "~/config";
 import { CollectionModel, UploadedImageModel } from "~/db/models";
 import {
-  CreateCollectionData,
-  PublishCollectionData,
-} from "~/pages/create/zod";
+  CollectionFormData,
+  EditCollectionFormData,
+  PublishCollectionFormData,
+} from "~/db/zod";
 
 export const createCollection = async (
-  formData: CreateCollectionData
+  formData: CollectionFormData
 ): Promise<CollectionModel> => {
   const accessToken = localStorage.getItem("accessToken");
 
@@ -40,8 +41,43 @@ export const createCollection = async (
   }
 };
 
+export const editCollection = async (
+  formData: EditCollectionFormData
+): Promise<CollectionModel> => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  try {
+    const response = await fetch(`${config.apiUrl}/api/collections/edit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        ...formData,
+        startTime: formData.startTime
+          ? new Date(formData.startTime).toISOString()
+          : "",
+        endTime: formData.endTime
+          ? new Date(formData.endTime).toISOString()
+          : "",
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message);
+    }
+    const data = await response.json();
+    return data as CollectionModel;
+  } catch (error) {
+    console.error("Error editing collection", error);
+    throw error;
+  }
+};
+
 export const publishCollection = async (
-  data: PublishCollectionData
+  data: PublishCollectionFormData
 ): Promise<CollectionModel> => {
   try {
     const accessToken = localStorage.getItem("accessToken");

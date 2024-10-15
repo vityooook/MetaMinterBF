@@ -10,9 +10,10 @@ import { toast } from "~/components/ui/use-toast.ts";
 import { useCollectionStore } from "~/db/collectionStore";
 import { Badge } from "~/components/ui/badge";
 import { CollectionContract } from "~/contracts/collection";
-import { useDeployMutation } from "../create/hooks/useDeployMutation";
+import { useDeployMutation } from "../../hooks/useDeployMutation";
 import { ConfirmDeploy } from "./steps/confirm";
 import { getPlatformTitle, getPlatformIcon } from "~/lib/social-utils";
+import { Button } from "~/components/ui/button";
 
 export function generateShareUrl(text: string = "", id: string): string {
   const encodedText = encodeURIComponent(text);
@@ -76,6 +77,8 @@ export const CollectionViewPage: React.FC = () => {
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
   }, [utils, collection]);
+
+  // const handleDeclineOwnership = useCallback(() => {}, []);
 
   useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");
@@ -161,7 +164,7 @@ export const CollectionViewPage: React.FC = () => {
           )}
         </header>
 
-        <section className="px-4 py-5">
+        <section className="px-4 py-5 space-y-2">
           <Card>
             {collection.startTime && (
               <div className="flex items-center justify-between p-3 border-b border-border">
@@ -200,6 +203,17 @@ export const CollectionViewPage: React.FC = () => {
               <div>{collection.nftPrice} TON</div>
             </div>
           </Card>
+          <Button className="bg-card w-full" asChild>
+            <Link to="edit">Edit collection</Link>
+          </Button>
+          {/* <div className="space-y-1">
+            <ConfirmButton onClick={handleDeclineOwnership}>
+              Decline ownership
+            </ConfirmButton>
+            <p className="text-sm px-8 text-center">
+              Нажмите на кнопку три раза подряд, чтобы подтвердить свой выбор
+            </p>
+          </div> */}
         </section>
       </div>
     )

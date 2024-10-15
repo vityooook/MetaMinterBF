@@ -8,9 +8,9 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { createCollectionSchema } from "../zod";
+import { collectionSchema } from "../../../db/zod";
 import { Textarea } from "~/components/ui/textarea";
-import { ImageUploadPreview } from "~/pages/create/ui/image-uploader";
+import { ImageUploadPreview } from "~/components/image-uploader";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,7 @@ import { z } from "zod";
 import { useMainButton } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 
-export const formSchema = createCollectionSchema.pick({
+export const formSchema = collectionSchema.pick({
   nfts: true,
 });
 

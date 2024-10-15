@@ -1,17 +1,17 @@
 import { User } from "@telegram-apps/sdk-react";
-import { CreateCollectionData, NftData } from "~/pages/create/zod";
+import { CollectionFormData, NftFormData } from "~/db/zod";
 
 export type UserModel = User & {
   _id?: string;
   isOnboarded: boolean;
 };
 
-export type NftModel = NftData & {
+export type NftModel = NftFormData & {
   _id?: string;
   image: string;
 };
 
-export type CollectionModel = CreateCollectionData & {
+export type CollectionModel = CollectionFormData & {
   _id: string;
   hash: string;
   deployed: boolean;

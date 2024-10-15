@@ -8,6 +8,7 @@ import { CollectionForm } from "./pages/create/steps/collection";
 import { NftForm } from "./pages/create/steps/nft";
 import { SettingsForm } from "./pages/create/steps/settings";
 import { CollectionViewPage } from "./pages/view/page";
+import { CollectionEditPage } from "./pages/edit/page";
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
         ],
       },
       { path: "/collections/:collectionId", element: <CollectionViewPage /> },
+      {
+        path: "/collections/:collectionId/edit",
+        element: <CollectionEditPage />,
+      },
       {
         path: "/collections/:collectionId/mint",
         element: <CollectionMintPage />,

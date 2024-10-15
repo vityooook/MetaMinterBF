@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { CreateCollectionData } from "./zod";
+import { CollectionFormData } from "../../db/zod";
 
-const initialFormData: CreateCollectionData = {
+const initialFormData: CollectionFormData = {
   image: "",
   name: "",
   description: "",
@@ -24,8 +24,8 @@ export type FormStep = "collection" | "nft" | "settings" | "finish";
 
 type FormStore = {
   step: FormStep;
-  formData: CreateCollectionData;
-  set: (data: Partial<CreateCollectionData>, step: FormStep) => void;
+  formData: CollectionFormData;
+  set: (data: Partial<CollectionFormData>, step: FormStep) => void;
   reset: () => void;
 };
 

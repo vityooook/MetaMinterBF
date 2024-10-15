@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "./ui/button";
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { Input } from "../../../components/ui/input";
+import { Input } from "./ui/input";
 
 interface QuantityFieldProps {
   nftPrice: number;

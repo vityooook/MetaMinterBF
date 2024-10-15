@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createCollection } from "~/api/backend";
 import { toast } from "~/components/ui/use-toast.ts";
 import { useCollectionStore } from "~/db/collectionStore";
-import { useFormStore } from "../store";
+import { useFormStore } from "../pages/create/store";
 
 export const useCreateMutation = () => {
   const { addCollection } = useCollectionStore();

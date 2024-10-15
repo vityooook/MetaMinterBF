@@ -83,15 +83,33 @@ export function formatDateToLocal(dateString: string): string {
 
   // Define options with the correct types
   const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
   };
 
   // Format the date and remove the comma between the date and time
-  const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
-  return formattedDate.replace(',', ''); // Remove comma
+  const formattedDate = new Intl.DateTimeFormat("en-US", options).format(date);
+  return formattedDate.replace(",", ""); // Remove comma
 }
+
+export const formatToLocalDateTime = (
+  dateString: string | undefined
+): string | undefined => {
+  if (!dateString) return undefined;
+
+  const date = new Date(dateString);
+
+  // Get the local date and time components
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  // Return formatted date string for "datetime-local" input
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};

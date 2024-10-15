@@ -6,7 +6,9 @@ export const nftSchema = z.object({
   description: z.string().min(1, "Description is required"),
 });
 
-export const createCollectionSchema = z.object({
+export const collectionSchema = z.object({
+  _id: z.string().optional(),
+  ownerId: z.string().optional(),
   image: z.string().min(1, "Please upload collection image"),
   name: z.string().min(1, "Collection name is required"),
   description: z.string().min(1, "Collection description is required"),
@@ -25,6 +27,17 @@ export const publishCollectionSchema = z.object({
   address: z.string(),
 });
 
-export type CreateCollectionData = z.infer<typeof createCollectionSchema>;
-export type PublishCollectionData = z.infer<typeof publishCollectionSchema>;
-export type NftData = z.infer<typeof nftSchema>;
+export const editCollectionSchema = collectionSchema.pick({
+  _id: true,
+  ownerId: true,
+  links: true,
+  startTime: true,
+  endTime: true,
+  nftPrice: true,
+  itemsLimit: true,
+});
+
+export type CollectionFormData = z.infer<typeof collectionSchema>;
+export type EditCollectionFormData = z.infer<typeof editCollectionSchema>;
+export type PublishCollectionFormData = z.infer<typeof publishCollectionSchema>;
+export type NftFormData = z.infer<typeof nftSchema>;

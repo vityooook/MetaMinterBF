@@ -4,6 +4,7 @@ import { CollectionDto } from "./dto/create.dto";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/auth/auth.guard";
 import { PublishDto } from "./dto/publish.dto";
+import { EditCollectionDto } from "./dto/edit.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller("api/collections")
@@ -24,6 +25,11 @@ export class NftController {
   @Post("/publish")
   async publishCollection(@Body() data: PublishDto) {
     return await this.nftService.publishCollection(data.id, data.address);
+  }
+
+  @Post("/edit")
+  async editCollection(@Body() data: EditCollectionDto, @CurrentUser() user) {
+    return await this.nftService.editCollection(data, user);
   }
 
   @Get(":id")

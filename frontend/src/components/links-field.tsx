@@ -1,4 +1,4 @@
-import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -10,10 +10,9 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { XIcon } from "lucide-react";
 import { getPlatformIcon } from "~/lib/social-utils";
-import { FormData } from "../steps/collection";
 
 interface LinksFieldProps {
-  form: UseFormReturn<FormData>;
+  form: any;
   max?: number;
   label?: string;
 }
@@ -71,7 +70,9 @@ export const LinksField: React.FC<LinksFieldProps> = ({
                   />
 
                   {/* Platform Icon */}
-                  <div className="ml-2 absolute top-3 left-1">{getPlatformIcon(field.value, 4)}</div>
+                  <div className="ml-2 absolute top-3 left-1">
+                    {getPlatformIcon(field.value, 4)}
+                  </div>
                 </div>
               </FormControl>
 

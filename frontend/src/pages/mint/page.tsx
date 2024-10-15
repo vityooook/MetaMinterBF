@@ -19,7 +19,7 @@ import { useBack } from "~/hooks/useBack";
 import { getPlatformIcon, getPlatformTitle } from "~/lib/social-utils";
 import { minifyAddress } from "~/lib/utils";
 import { generateShareUrl } from "../view/page";
-import { QuantityField } from "./ui/quantity-field";
+import { QuantityField } from "../../components/quantity-field";
 import { Badge } from "~/components/ui/badge";
 import { ConfirmMint } from "./steps/confirm";
 

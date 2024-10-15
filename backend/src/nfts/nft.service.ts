@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Collection } from "./entities/collection.entity";
@@ -6,6 +10,7 @@ import { User } from "../users/entities/user.entity";
 import { CollectionDto } from "./dto/create.dto";
 import { Nft } from "./entities/nft.entity";
 import axios from "axios";
+import { EditCollectionDto } from "./dto/edit.dto";
 
 @Injectable()
 export class NftService {
@@ -61,6 +66,49 @@ export class NftService {
     };
 
     return response;
+  }
+
+  async editCollection(editCollectionDto: EditCollectionDto, user: User) {
+    const collection = await this.collectionModel.findOne({
+      _id: editCollectionDto._id,
+      ownerId: user._id,
+    });
+
+    if (!collection) {
+      throw new NotFoundException("Collection not found or access denied");
+    }
+
+    if (collection.ownerId.toString() !== user._id.toString()) {
+      throw new ForbiddenException(
+        "You do not have permission to edit this collection",
+      );
+    }
+
+    if (editCollectionDto.nftPrice !== undefined) {
+      collection.nftPrice = editCollectionDto.nftPrice;
+    }
+
+    if (editCollectionDto.itemsLimit !== undefined) {
+      collection.itemsLimit = editCollectionDto.itemsLimit;
+    }
+
+    if (editCollectionDto.links !== undefined) {
+      collection.links = editCollectionDto.links;
+    }
+
+    if (editCollectionDto.startTime !== undefined) {
+      collection.startTime = editCollectionDto.startTime;
+    }
+
+    if (editCollectionDto.endTime !== undefined) {
+      collection.endTime = editCollectionDto.endTime;
+    }
+
+    // Save the updated collection
+    const updatedCollection = await collection.save();
+
+    // Return the updated collection data
+    return updatedCollection;
   }
 
   async findCollectionById(id: string) {
