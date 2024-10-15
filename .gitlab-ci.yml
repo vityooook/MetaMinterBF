@@ -122,7 +122,6 @@ build_production:
       EOF
     - docker compose pull
     - docker compose up -d
-    - shred -u .env
 
 deploy_development:
   environment:
