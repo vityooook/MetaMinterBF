@@ -75,6 +75,8 @@ prepare_production:
         --destination "$IMAGE_NAME:$SHORT_SHA" \
         $(for tag in $DESTINATION_TAGS; do echo "--destination $tag"; done) \
         --build-arg "TYPE_SERVER=${TYPE_SERVER}" \
+        --cache=true \
+        --cache-ttl=24h \
         --cleanup
 
 build_development:
