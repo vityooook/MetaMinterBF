@@ -1,5 +1,5 @@
 // WelcomeView.tsx
-import WelcomeBg from "~/assets/icons/WelcomeBg.svg"; // Ensure this is an SVG or image file
+import WelcomeBg from "~/assets/images/WelcomeBg.svg"; // Ensure this is an SVG or image file
 import { useTranslation } from "react-i18next";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 import { Button } from "~/components/ui/button";
