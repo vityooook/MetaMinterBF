@@ -120,6 +120,7 @@ build_production:
       CLOUDFLARE_BUCKET_NAME=$CLOUDFLARE_BUCKET_NAME
       CLOUDFLARE_R2_ENDPOINT=$CLOUDFLARE_R2_ENDPOINT
       EOF
+    - chmod 600 .env
     - docker compose pull
     - docker compose up -d
 
