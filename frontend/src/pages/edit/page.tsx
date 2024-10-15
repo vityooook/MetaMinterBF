@@ -19,7 +19,6 @@ import { LinksField } from "~/components/links-field";
 import { useParams } from "react-router-dom";
 import { useCollectionStore } from "~/db/collectionStore";
 import { formatToLocalDateTime } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
 
 export const CollectionEditPage = () => {
   useBack("../");
@@ -180,7 +179,6 @@ export const CollectionEditPage = () => {
         </FormItem>
 
         <LinksField form={form} label="Links" />
-        <Button>Submit</Button>
       </form>
     </Form>
   );
