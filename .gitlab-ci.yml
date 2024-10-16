@@ -99,7 +99,12 @@ build_production:
     - ad-docker-shell
   script:
     - mkdir -p $DATABASE_PATH/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - mkdir -p $DATABASE_PATH/backups/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - mkdir -p ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - rsync -a --delete $CI_PROJECT_DIR/ ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH/
+    - cd ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
     - docker compose pull
+    - docker exec ${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}-db mongodump --archive > "$DATABASE_PATH/backups/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH/mongo_backup_before_commit_${CI_COMMIT_SHA:0:8}.archive"
     - docker compose up -d
 
 deploy_development:
