@@ -7,7 +7,7 @@ const initialFormData: CollectionFormData = {
   name: "",
   description: "",
   itemsLimit: undefined,
-  nftPrice: 0,
+  nftPrice: 0.2,
   links: [],
   nfts: [
     {

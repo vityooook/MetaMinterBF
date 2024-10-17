@@ -46,17 +46,14 @@ export class UploadService {
 
     // Обрабатываем изображение, добавляем автоориентацию и рекомендуем размер
     const recommendedSize = resolution; // Рекомендуемый размер 512x512 пикселей
-    const imageBuffer = await sharp(file.buffer).rotate(); // Автоориентация изображения
-
-    if (resolution) {
-      imageBuffer.resize({
+    const imageBuffer = await sharp(file.buffer)
+      .rotate()
+      .resize({
         width: Number(recommendedSize),
         height: Number(recommendedSize),
         fit: sharp.fit.cover, // Принудительное приведение к квадрату 512x512
-      });
-    }
-
-    imageBuffer.toBuffer();
+      })
+      .toBuffer(); // Автоориентация изображения
 
     const date = new Date().toISOString().split("T")[0];
 

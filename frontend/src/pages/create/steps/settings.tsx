@@ -38,6 +38,7 @@ export const SettingsForm = () => {
   const form = useForm<FormData>({
     mode: "onSubmit",
     resolver: zodResolver(formSchema),
+    defaultValues: formData
   });
 
   const handleSubmit = useCallback(
