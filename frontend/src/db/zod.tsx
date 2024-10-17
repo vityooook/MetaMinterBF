@@ -27,7 +27,7 @@ export const collectionSchema = z.object({
   itemsLimit: z.coerce.number().optional(),
   nftPrice: z.coerce
     .number()
-    .min(0.01, "Цена предмета должна быть больше или равна 0"),
+    .min(0.2, "Price should be minimum 0.2 TON"),
   links: z.array(z.string().url("Invalid Url. Enter url with https://")),
   nfts: z.array(nftSchema).min(1, "At least one item is required"), // Require at least one item
   startTime: z.string().optional(),

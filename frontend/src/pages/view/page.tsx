@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "~/components/ui/card";
-import { formatDateToLocal, minifyAddress } from "~/lib/utils";
+import { cn, formatDateToLocal, minifyAddress } from "~/lib/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { config } from "~/config";
@@ -126,7 +126,7 @@ export const CollectionViewPage: React.FC = () => {
     <ConfirmDeploy />
   ) : (
     collection && (
-      <div className="-mt-4 -mx-4">
+      <div className={cn('-mt-4 -mx-4', !collection.deployed && 'pb-4')}>
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
           <div className="relative">
             {collection.image && (
@@ -214,6 +214,7 @@ export const CollectionViewPage: React.FC = () => {
               Нажмите на кнопку три раза подряд, чтобы подтвердить свой выбор
             </p>
           </div> */}
+          {!collection.deployed && <p className="text-xs bg-background text-muted-foreground text-center p-2 px-6 fixed bottom-0 left-0 right-0">Commissions: 0.3 TON to deploy a collection <br /> and 0.1 TON per mint.</p> }
         </section>
       </div>
     )

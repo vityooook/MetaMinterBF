@@ -121,15 +121,7 @@ export class CollectionContract implements CollectionContractActions {
       collectionContent: `${config.apiUrl}/api/metadata/collection/${collection._id}.json`,
       itemContent: `${config.apiUrl}/api/metadata/nft/`,
       itemContentJson: `${collection.nfts[0]._id}.json`,
-      commission: config.itemComission,
-      ...(referralAddress
-        ? {
-            ref: {
-              referralAddress: address(referralAddress),
-              referralComission: referralComission || BigInt(0), // При 0 вся сумма от деплоя перефодится реф адресу 
-            },
-          }
-        : {}),
+      commission: config.itemComission
     });
   
     try {
