@@ -25,7 +25,7 @@ import { ConfirmMint } from "./steps/confirm";
 
 export const CollectionMintPage: React.FC = () => {
   useBack("/");
-  
+
   const { collectionId } = useParams<{ collectionId: string }>();
   const { data: collection } = useQuery({
     queryKey: ["collections", collectionId],
@@ -47,6 +47,10 @@ export const CollectionMintPage: React.FC = () => {
 
   const isBeforeStartTime = collection?.startTime
     ? new Date(collection.startTime) > new Date()
+    : false;
+
+  const isAfterEndTime = collection?.endTime
+    ? new Date(collection.endTime) < new Date()
     : false;
 
   const { data: collectionData } = useQuery({
@@ -97,7 +101,7 @@ export const CollectionMintPage: React.FC = () => {
   useEffect(() => {
     const onMint = handleMint;
 
-    if (userAddress && !isBeforeStartTime) {
+    if (userAddress && !isBeforeStartTime && !isAfterEndTime) {
       mb.show();
 
       if (quantity === 0) {
@@ -182,7 +186,7 @@ export const CollectionMintPage: React.FC = () => {
         )}
       </header>
 
-      {isBeforeStartTime ? (
+      {isBeforeStartTime && (
         <>
           <section className="flex flex-col items-center pt-10">
             <div className="flex gap-3">
@@ -197,7 +201,9 @@ export const CollectionMintPage: React.FC = () => {
             <p className="text-muted-foreground">Please wait...</p>
           </section>
         </>
-      ) : (
+      )}
+
+      {!isBeforeStartTime && (
         <>
           <section className="px-4 py-5">
             <Card>
@@ -236,19 +242,24 @@ export const CollectionMintPage: React.FC = () => {
               )}
             </Card>
           </section>
-          {userAddress && (
-            <QuantityField
-              nftPrice={collection.nftPrice}
-              onQuantityChange={(value) => setQuantity(value)}
-            />
-          )}
-          {!userAddress && (
-            <section className="flex flex-col text-center items-center gap-4 mt-auto pb-16">
-              <p className="text-muted-foreground text-sm px-24">
-                To make a purchase, you need to connect a TON wallet.
-              </p>
-              <TonConnectButton />
-            </section>
+          {isAfterEndTime && <div className="text-4xl font-semibold text-center pt-4">Mint is over!</div>}
+          {!isAfterEndTime && (
+            <>
+              {userAddress && (
+                <QuantityField
+                  nftPrice={collection.nftPrice}
+                  onQuantityChange={(value) => setQuantity(value)}
+                />
+              )}
+              {!userAddress && (
+                <section className="flex flex-col text-center items-center gap-4 mt-auto pb-16">
+                  <p className="text-muted-foreground text-sm px-24">
+                    To make a purchase, you need to connect a TON wallet.
+                  </p>
+                  <TonConnectButton />
+                </section>
+              )}
+            </>
           )}
         </>
       )}

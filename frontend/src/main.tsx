@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
-import { TmaProvider } from "./providers/tma-provider.tsx";
-import { QueryProvider } from "./providers/query-provider.tsx";
+import { TmaProvider } from "~/providers/tma-provider.tsx";
+import { QueryProvider } from "~/providers/query-provider.tsx";
 import "./polyfills.ts";
 
 import "./globals.css";
@@ -15,9 +15,9 @@ import { router } from "./router.tsx";
 export const Root = () => {
   return (
     <TonConnectUIProvider
-      manifestUrl={`https://raw.githubusercontent.com/kirillmelcin96/test/refs/heads/main/manifest.json`}
+      manifestUrl={`https://app.metaminter.tmadevs.com/tonconnect-manifest.json`}
       actionsConfiguration={{
-        twaReturnUrl: `https://t.me/${config.botName}/app`,
+        twaReturnUrl: `https://t.me/${config.botName}/onboarding`,
       }}
     >
       <ThemeProvider defaultTheme="dark" storageKey="shadcn-ui-theme">

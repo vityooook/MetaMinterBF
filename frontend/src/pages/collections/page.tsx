@@ -9,6 +9,7 @@ import { useBackButton } from "@telegram-apps/sdk-react";
 import { Button } from "~/components/ui/button";
 import { Footer } from "~/components/footer";
 import LogoSvg from "~/assets/images/metaming-logo.svg";
+import { InviteFriend } from "~/components/invite-friend";
 
 export const CollectionPage: React.FC = () => {
   const toncoinPrice = 6;
@@ -32,6 +33,7 @@ export const CollectionPage: React.FC = () => {
           <img src={LogoSvg} alt="MetaMinter" className="h-6" />
         </div>
         <div className="flex items-center gap-2">
+          <InviteFriend />
           <img
             src={`https://unavatar.io/telegram/${user.username}`}
             className="w-8 h-8 border-2 border-primary rounded-full"

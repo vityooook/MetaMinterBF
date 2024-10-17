@@ -24,7 +24,7 @@ export const OnboardingPage = () => {
           </h1>
         </div>
         <div className="flex flex-col items-center px-10 w-screen animate-slideUp">
-          <p className="text-3xl font-medium">{t("welcome_hello")}</p>
+          <p className="text-3xl font-bold">{t("welcome_hello")}</p>
           <p className="text-center mt-2">{t("welcome_instruction")}</p>
         </div>
         <Button asChild size="lg" className="w-full">
