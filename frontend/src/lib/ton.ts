@@ -134,29 +134,17 @@ export async function generateCollectionPayload(args: {
   const collectionData = beginCell()
     .storeAddress(args.userOwner)
     .storeAddress(args.admin)
-    .storeRef(
-      beginCell()
-        .storeRef(
-          buildCollectionContentCell(
-            args.collectionContent,
-            args.itemContent
-          )
-        )
-        .storeRef(
-          beginCell().storeBuffer(Buffer.from(args.itemContentJson)).endCell()
-        )
-        .storeRef(nftItemCodeCell)
-        .endCell()
-    )
-    .storeInt(-1, 8)
+    .storeInt(-1, 2)
     .storeCoins(args.price)
     .storeUint(0, 32)
     .storeUint(args.buyerLimit, 32)
     .storeUint(args.startTime, 32)
     .storeUint(args.endTime, 32)
     .storeCoins(args.commission)
+    .storeRef(buildCollectionContentCell(args.collectionContent, args.itemContent))
+    .storeRef(beginCell().storeBuffer(Buffer.from(args.itemContentJson)).endCell())
+    .storeRef(nftItemCodeCell)
     .endCell();
-
   // Create state initialization
   const stateInit = beginCell()
     .storeUint(0, 2)
