@@ -119,7 +119,7 @@ export async function generateCollectionPayload(args: {
   commission: bigint; // Commission fee
   ref?: {
     referralAddress: Address;
-    referralComission?: bigint; // if comission = 0 referral get all ton from transaction 
+    referralComission: bigint; // if comission = 0 referral get all ton from transaction 
 }
 }): Promise<CollectionPayload> {
   // Convert hex strings to Cell objects
@@ -181,7 +181,7 @@ export async function generateCollectionPayload(args: {
         .storeUint(4, 32)
         .storeUint(0, 64)
         .storeAddress(args.ref.referralAddress)
-        .storeCoins(args.ref.referralComission ?? 0)
+        .storeCoins(args.ref.referralComission)
     .endCell().toBoc().toString("base64");
 } else {
     var msgBody = beginCell()

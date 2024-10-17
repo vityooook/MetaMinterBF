@@ -94,7 +94,17 @@ export class CollectionContract implements CollectionContractActions {
     };
   }
 
-  async deploy({ tonConnect, userAddress, collection }: SendCollectionData) {
+  async deploy({
+    tonConnect,
+    userAddress,
+    collection,
+    referralAddress,
+    referralComission,
+  }: SendCollectionData & {
+    referralAddress?: string;
+    referralComission?: bigint;
+  }) {
+    // Подготавливаем аргументы для вызова функции generateCollectionPayload
     const payload = await generateCollectionPayload({
       nftCollectionCodeHex: NFT_COLLECTION_CODE_HEX,
       nftItemCodeHex: NFT_ITEM_CODE_HEX,
@@ -112,9 +122,16 @@ export class CollectionContract implements CollectionContractActions {
       itemContent: `${config.apiUrl}/api/metadata/nft/`,
       itemContentJson: `${collection.nfts[0]._id}.json`,
       commission: config.itemComission,
-      // ref не разобрался как правильно реализовать 
+      ...(referralAddress
+        ? {
+            ref: {
+              referralAddress: address(referralAddress),
+              referralComission: referralComission || BigInt(0), // При 0 вся сумма от деплоя перефодится реф адресу 
+            },
+          }
+        : {}),
     });
-
+  
     try {
       await tonConnect.sendTransaction(
         {
@@ -124,18 +141,20 @@ export class CollectionContract implements CollectionContractActions {
               address: payload.address.toString(),
               amount: Number(config.deployComission).toString(),
               stateInit: payload.stateInitBase64,
-              payload: payload.msgBody
+              payload: payload.msgBody,
             },
           ],
         },
         tonConnectOptions
       );
-
+  
       return payload;
     } catch (e) {
       throw new Error("Cannot deploy collection in TON");
     }
   }
+  
+  
 
   private createBodyMessage(quantity: number): Cell {
     return beginCell()
