@@ -20,6 +20,10 @@ import { useNavigate } from "react-router-dom";
 import { useMainButton } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 
+// Get the max length from the Zod schema
+const nameMaxLength = collectionSchema.shape.name.maxLength || undefined;
+const descriptionMaxLength = collectionSchema.shape.description.maxLength || undefined;
+
 export const formSchema = collectionSchema.pick({
   image: true,
   name: true,
@@ -97,7 +101,11 @@ export const CollectionForm = () => {
             <FormItem>
               <FormLabel>Collection Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter Collection name" {...field} />
+                <Input 
+                  placeholder="Enter Collection name" 
+                  maxLength={nameMaxLength} 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,6 +122,7 @@ export const CollectionForm = () => {
                 <Textarea
                   rows={3}
                   placeholder="Enter Collection description"
+                  maxLength={descriptionMaxLength}
                   {...field}
                 />
               </FormControl>

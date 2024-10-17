@@ -25,6 +25,10 @@ export const formSchema = collectionSchema.pick({
 
 export type FormData = z.infer<typeof formSchema>;
 
+// Get the max length from the Zod schema
+const nameMaxLength = collectionSchema.shape.nfts.element.shape.name.maxLength || undefined;
+const descriptionMaxLength = collectionSchema.shape.nfts.element.shape.description.maxLength || undefined;
+
 export const NftForm = () => {
   useBack("../");
   const { set: setFormData, formData } = useFormStore();
@@ -86,12 +90,16 @@ export const NftForm = () => {
 
         <FormField
           control={form.control}
-          name="nfts.0.name" // Update to handle only one item
+          name="nfts.0.name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>NFT Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter NFT name" {...field} />
+                <Input 
+                  placeholder="Enter NFT name" 
+                  maxLength={nameMaxLength}
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,7 +108,7 @@ export const NftForm = () => {
 
         <FormField
           control={form.control}
-          name="nfts.0.description" // Update to handle only one item
+          name="nfts.0.description"
           render={({ field }) => (
             <FormItem>
               <FormLabel>NFT Description</FormLabel>
@@ -108,6 +116,7 @@ export const NftForm = () => {
                 <Textarea
                   rows={3}
                   placeholder="Enter NFT description"
+                  maxLength={descriptionMaxLength}
                   {...field}
                 />
               </FormControl>

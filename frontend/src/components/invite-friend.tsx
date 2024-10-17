@@ -58,7 +58,7 @@ export const InviteFriend = ({ className }: { className?: string }) => {
   return (
     <div>
       <Popover open={open && !isMobile} onOpenChange={setOpen}>
-        <Button onClick={handleInvite} className={cn("gap-2", className)}>
+        <Button onClick={handleInvite} size="icon" variant="ghost" className={cn("gap-2", className)}>
           <ShareIcon className="w-5 h-5" />
         </Button>
         <PopoverContent className="overflow-hidden">
