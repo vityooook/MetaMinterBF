@@ -31,7 +31,7 @@ ENV TYPE_SERVER="$TYPE_SERVER"
 
 COPY --from=builder /app/$TYPE_SERVER/dist /usr/share/nginx/html
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/
 
 EXPOSE 80
 
