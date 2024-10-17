@@ -28,7 +28,7 @@ export const OnboardingPage = () => {
           <p className="text-center mt-2">{t("welcome_instruction")}</p>
         </div>
         <Button asChild size="lg" className="w-full">
-          <Link to="/collections/create">Create Collection</Link>
+          <Link to="/">Continue</Link>
         </Button>
       </div>
     </div>

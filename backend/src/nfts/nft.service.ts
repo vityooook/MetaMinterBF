@@ -150,11 +150,14 @@ export class NftService {
   async collectionMetadataJson(id: string) {
     const metadata = await this.collectionModel.findOne({ _id: id });
 
-    const result = {
+    const result = Object.assign({
       name: metadata.name,
       description: metadata.description,
       image: metadata.image,
-    };
+      social_links: metadata.links
+    }, metadata.links ? {
+      social_links: metadata.links
+    } : {});
 
     return result;
   }

@@ -10,7 +10,7 @@ import {
   decodeContentItem,
   decodeOffChainContent,
   generateCollectionPayload,
-  editData
+  editData,
 } from "~/lib/ton";
 import { ActionConfiguration, TonConnectUI } from "@tonconnect/ui-react";
 import { CollectionModel } from "~/db/models";
@@ -26,6 +26,8 @@ export type SendCollectionData = {
   tonConnect: TonConnectUI;
   userAddress: string;
   collection: CollectionModel;
+  referralAddress?: string;
+  referralComission?: bigint;
 };
 
 export type MintNftData = {
@@ -43,14 +45,14 @@ export type CollectionData = {
 };
 
 export type EditData = {
-    tonConnect: TonConnectUI;
-    collectionAddress: Address;
-    price: bigint; 
-    buyerLimit: number; 
-    startTime: number; 
-    endTime: number; 
-    available: number; 
-    ownerAddress: Address;
+  tonConnect: TonConnectUI;
+  collectionAddress: Address;
+  price: bigint;
+  buyerLimit: number;
+  startTime: number;
+  endTime: number;
+  available: number;
+  ownerAddress: Address;
 };
 
 export interface CollectionContractActions {
@@ -94,16 +96,7 @@ export class CollectionContract implements CollectionContractActions {
     };
   }
 
-  async deploy({
-    tonConnect,
-    userAddress,
-    collection,
-    referralAddress,
-    referralComission,
-  }: SendCollectionData & {
-    referralAddress?: string;
-    referralComission?: bigint;
-  }) {
+  async deploy({ tonConnect, userAddress, collection }: SendCollectionData) {
     // Подготавливаем аргументы для вызова функции generateCollectionPayload
     const payload = await generateCollectionPayload({
       nftCollectionCodeHex: NFT_COLLECTION_CODE_HEX,
@@ -121,9 +114,9 @@ export class CollectionContract implements CollectionContractActions {
       collectionContent: `${config.apiUrl}/api/metadata/collection/${collection._id}.json`,
       itemContent: `${config.apiUrl}/api/metadata/nft/`,
       itemContentJson: `${collection.nfts[0]._id}.json`,
-      commission: config.itemComission
+      commission: config.itemComission,
     });
-  
+
     try {
       await tonConnect.sendTransaction(
         {
@@ -139,14 +132,12 @@ export class CollectionContract implements CollectionContractActions {
         },
         tonConnectOptions
       );
-  
+
       return payload;
     } catch (e) {
       throw new Error("Cannot deploy collection in TON");
     }
   }
-  
-  
 
   private createBodyMessage(quantity: number): Cell {
     return beginCell()
@@ -190,24 +181,27 @@ export class CollectionContract implements CollectionContractActions {
   }: {
     tonConnect: TonConnectUI;
     collectionAddress: Address;
-  } & Partial<Omit<EditData, 'tonConnect' | 'collectionAddress'>>) {
-  
+  } & Partial<Omit<EditData, "tonConnect" | "collectionAddress">>) {
     // Получаем текущие данные коллекции, если какие-то из значений не переданы
     const currentData = await this.getData(collectionAddress);
-  
+
     const msgBody = await editData({
       price: price !== undefined ? toNano(price) : currentData.price, // Используем текущее значение, если новое не передано
-      buyerLimit: buyerLimit !== undefined ? buyerLimit : currentData.buyerLimit,
-      startTime: startTime !== undefined
-        ? Math.floor(Number(new Date(startTime).getTime()) / 1000)
-        : currentData.startTime,
-      endTime: endTime !== undefined
-        ? Math.floor(Number(new Date(endTime).getTime()) / 1000)
-        : currentData.endTime,
+      buyerLimit:
+        buyerLimit !== undefined ? buyerLimit : currentData.buyerLimit,
+      startTime:
+        startTime !== undefined
+          ? Math.floor(Number(new Date(startTime).getTime()) / 1000)
+          : currentData.startTime,
+      endTime:
+        endTime !== undefined
+          ? Math.floor(Number(new Date(endTime).getTime()) / 1000)
+          : currentData.endTime,
       available: available !== undefined ? available : currentData.available,
-      ownerAddress: ownerAddress !== undefined ? ownerAddress : currentData.owner_user,
+      ownerAddress:
+        ownerAddress !== undefined ? ownerAddress : currentData.owner_user,
     });
-  
+
     try {
       return await tonConnect.sendTransaction(
         {
@@ -226,5 +220,4 @@ export class CollectionContract implements CollectionContractActions {
       throw new Error("Cannot edit collection data in TON");
     }
   }
-  
 }
