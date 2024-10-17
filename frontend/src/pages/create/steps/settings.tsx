@@ -17,6 +17,7 @@ import { useFormStore } from "../store";
 import { useMainButton } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { useCreateMutation } from "../../../hooks/useCreateMutation";
+import { Switch } from "~/components/ui/switch";
 
 export const formSchema = collectionSchema.pick({
   itemsLimit: true,
@@ -72,12 +73,27 @@ export const SettingsForm = () => {
     };
   }, [mb]);
 
+  const [showAmount, setShowAmount] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
+
+  useEffect(() => {
+    // Check if itemsLimit exists and set showAmount accordingly
+    if (form.getValues("itemsLimit")) {
+      setShowAmount(true);
+    }
+
+    // Check if startTime or endTime exists and set showTimer accordingly
+    if (form.getValues("startTime") || form.getValues("endTime")) {
+      setShowTimer(true);
+    }
+  }, [form]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="nftPrice" // Update to handle only one item
+          name="nftPrice"
           render={({ field }) => (
             <FormItem>
               <FormLabel>NFT Price</FormLabel>
@@ -106,77 +122,112 @@ export const SettingsForm = () => {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="itemsLimit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter amount"
-                  type="input"
-                  pattern="\d*"
-                  inputMode="decimal"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Specify the number of NFTs available for purchase
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormItem className="gap-2">
-          <FormLabel>Timer</FormLabel>
-          <div className="flex gap-2 items-center">
-            <FormField
-              control={form.control}
-              name="startTime"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      min={today}
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e.target.value);
-                        handleFromDateChange(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <span>–</span>
-
-            <FormField
-              control={form.control}
-              name="endTime"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      min={fromDate || today} // Disable dates before fromDate
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <FormItem>
+          <div className="flex items-center justify-between">
+            <FormLabel>Limited amount</FormLabel>
+            <Switch
+              checked={showAmount}
+              onCheckedChange={(checked) => {
+                setShowAmount(checked);
+                if (!checked) {
+                  form.setValue("itemsLimit", undefined);
+                }
+              }}
             />
           </div>
-
-          <FormDescription>
-            Specify when the sale of the collection will start and end
-          </FormDescription>
+          {showAmount && (
+          <FormField
+            control={form.control}
+            name="itemsLimit"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="Enter amount"
+                    type="input"
+                    pattern="\d*"
+                    inputMode="decimal"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Specify the number of NFTs available for purchase
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         </FormItem>
+
+        
+
+        <FormItem>
+          <div className="flex items-center justify-between">
+            <FormLabel>Set timer</FormLabel>
+            <Switch
+              checked={showTimer}
+              onCheckedChange={(checked) => {
+                setShowTimer(checked);
+                if (!checked) {
+                  form.setValue("startTime", undefined);
+                  form.setValue("endTime", undefined);
+                }
+              }}
+            />
+          </div>
+          {showTimer && (
+          <FormItem className="gap-2">
+            <div className="flex gap-2 items-center">
+              <FormField
+                control={form.control}
+                name="startTime"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        min={today}
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          handleFromDateChange(e.target.value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <span>–</span>
+
+              <FormField
+                control={form.control}
+                name="endTime"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        min={fromDate || today}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormDescription>
+              Specify when the sale of the collection will start and end
+            </FormDescription>
+          </FormItem>
+        )}
+        </FormItem>
+
+      
       </form>
     </Form>
   );
