@@ -10,6 +10,7 @@ import {
   decodeContentItem,
   decodeOffChainContent,
   generateCollectionPayload,
+  editData
 } from "~/lib/ton";
 import { ActionConfiguration, TonConnectUI } from "@tonconnect/ui-react";
 import { CollectionModel } from "~/db/models";
@@ -41,9 +42,21 @@ export type CollectionData = {
   ownerAddress: Address;
 };
 
+export type EditData = {
+    tonConnect: TonConnectUI;
+    collectionAddress: Address;
+    price: bigint; 
+    buyerLimit: number; 
+    startTime: number; 
+    endTime: number; 
+    available: number; 
+    ownerAddress: Address;
+};
+
 export interface CollectionContractActions {
   deploy: (data: SendCollectionData) => Promise<CollectionPayload>;
   mint: (data: MintNftData) => Promise<any>;
+  edit: (data: EditData) => Promise<any>;
   getData: (collectionAddress: Address) => Promise<CollectionData>;
 }
 export class CollectionContract implements CollectionContractActions {
@@ -88,7 +101,7 @@ export class CollectionContract implements CollectionContractActions {
       admin: address(MASTER_ADDRESS),
       userOwner: address(userAddress),
       price: toNano(collection.nftPrice),
-      buyerLimit: collection.itemsLimit || 1,
+      buyerLimit: collection.itemsLimit || 0,
       startTime: collection.startTime
         ? Math.floor(Number(new Date(collection.startTime).getTime()) / 1000)
         : 0,
@@ -98,7 +111,8 @@ export class CollectionContract implements CollectionContractActions {
       collectionContent: `${config.apiUrl}/api/metadata/collection/${collection._id}.json`,
       itemContent: `${config.apiUrl}/api/metadata/nft/`,
       itemContentJson: `${collection.nfts[0]._id}.json`,
-      commission: config.deployCommission,
+      commission: config.itemComission,
+      // ref не разобрался как правильно реализовать 
     });
 
     try {
@@ -108,8 +122,9 @@ export class CollectionContract implements CollectionContractActions {
           messages: [
             {
               address: payload.address.toString(),
-              amount: Number(config.deployCommission).toString(),
+              amount: Number(config.deployComission).toString(),
               stateInit: payload.stateInitBase64,
+              payload: payload.msgBody
             },
           ],
         },
@@ -151,4 +166,54 @@ export class CollectionContract implements CollectionContractActions {
       throw new Error("Cannot mint nft in TON");
     }
   }
+
+  async edit({
+    tonConnect,
+    collectionAddress,
+    price,
+    buyerLimit,
+    startTime,
+    endTime,
+    available,
+    ownerAddress,
+  }: {
+    tonConnect: TonConnectUI;
+    collectionAddress: Address;
+  } & Partial<Omit<EditData, 'tonConnect' | 'collectionAddress'>>) {
+  
+    // Получаем текущие данные коллекции, если какие-то из значений не переданы
+    const currentData = await this.getData(collectionAddress);
+  
+    const msgBody = await editData({
+      price: price !== undefined ? toNano(price) : currentData.price, // Используем текущее значение, если новое не передано
+      buyerLimit: buyerLimit !== undefined ? buyerLimit : currentData.buyerLimit,
+      startTime: startTime !== undefined
+        ? Math.floor(Number(new Date(startTime).getTime()) / 1000)
+        : currentData.startTime,
+      endTime: endTime !== undefined
+        ? Math.floor(Number(new Date(endTime).getTime()) / 1000)
+        : currentData.endTime,
+      available: available !== undefined ? available : currentData.available,
+      ownerAddress: ownerAddress !== undefined ? ownerAddress : currentData.owner_user,
+    });
+  
+    try {
+      return await tonConnect.sendTransaction(
+        {
+          validUntil: Math.floor(Date.now() / 1000) + 90,
+          messages: [
+            {
+              address: collectionAddress.toString(),
+              amount: toNano("0.01").toString(),
+              payload: msgBody.body,
+            },
+          ],
+        },
+        tonConnectOptions
+      );
+    } catch (e) {
+      throw new Error("Cannot edit collection data in TON");
+    }
+  }
+  
 }

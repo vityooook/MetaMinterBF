@@ -99,6 +99,7 @@ export function buildCollectionContentCell(
 export type CollectionPayload = {
   address: Address;
   stateInitBase64: string;
+  msgBody: string;
 };
 
 // todo: move to collection contract
@@ -116,6 +117,10 @@ export async function generateCollectionPayload(args: {
   itemContent: string; // Base path for item content
   itemContentJson: string; // e.g. "nft.json"
   commission: bigint; // Commission fee
+  ref?: {
+    referralAddress: Address;
+    referralComission?: bigint; // if comission = 0 referral get all ton from transaction 
+}
 }): Promise<CollectionPayload> {
   // Convert hex strings to Cell objects
   const nftCollectionCodeCell = Cell.fromBoc(
@@ -171,9 +176,42 @@ export async function generateCollectionPayload(args: {
   // Convert state init cell to base64
   const stateInitBase64 = Buffer.from(stateInit.toBoc()).toString("base64");
 
-  return { address, stateInitBase64 };
+  if (args.ref) {
+    var msgBody = beginCell()
+        .storeUint(4, 32)
+        .storeUint(0, 64)
+        .storeAddress(args.ref.referralAddress)
+        .storeCoins(args.ref.referralComission ?? 0)
+    .endCell().toBoc().toString("base64");
+} else {
+    var msgBody = beginCell()
+        .storeUint(4, 32)
+        .storeUint(0, 64)
+    .endCell().toBoc().toString("base64");
 }
 
+  return { address, stateInitBase64, msgBody };
+}
+
+export async function editData(args: {
+    price: bigint;
+    buyerLimit: number;
+    startTime: number;
+    endTime: number;
+    available: number;
+    ownerAddress: Address;
+}) {
+    const body = beginCell()
+        .storeCoins(args.price)
+        .storeUint(args.buyerLimit, 32)
+        .storeUint(args.startTime, 32)
+        .storeUint(args.endTime, 32)
+        .storeInt(args.available, 2)
+        .storeAddress(args.ownerAddress)
+    .endCell().toBoc().toString("base64");
+
+    return { body };
+}
 
 export function decodeContentItem(cell: Cell): string {
   const slice = cell.beginParse(); // Создаём Slice для работы с ячейкой
