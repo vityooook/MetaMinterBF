@@ -4,8 +4,8 @@ services:
     container_name: ${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}-db
     image: mongo:4.4
     restart: unless-stopped
-    # ports:
-    #   - 27717:27017
+    ports:
+      - ${DB_PORT}:27017
     volumes:
       - ${DATABASE_PATH}/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}:/data/db
     networks:
