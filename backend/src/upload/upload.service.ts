@@ -29,9 +29,13 @@ export class UploadService {
     });
   }
 
-  public async uploadImageToR2(file: Express.Multer.File, userId: string) {
+  public async uploadImageToR2(
+    file: Express.Multer.File,
+    userId: string,
+    resolution?: string,
+  ) {
     // Проверяем формат файла
-    const supportedFormats = ["jpeg", "jpg", "png"];
+    const supportedFormats = ["jpeg", "jpg", "png", "svg", "webp"];
     const fileExtension = file.originalname.split(".").pop().toLowerCase();
 
     if (!supportedFormats.includes(fileExtension)) {
@@ -41,16 +45,18 @@ export class UploadService {
     }
 
     // Обрабатываем изображение, добавляем автоориентацию и рекомендуем размер
-    const recommendedSize = 512; // Рекомендуемый размер 512x512 пикселей
+    const recommendedSize = resolution; // Рекомендуемый размер 512x512 пикселей
+    const imageBuffer = await sharp(file.buffer).rotate(); // Автоориентация изображения
 
-    const imageBuffer = await sharp(file.buffer)
-      .rotate() // Автоориентация изображения
-      .resize({
-        width: recommendedSize,
-        height: recommendedSize,
+    if (resolution) {
+      imageBuffer.resize({
+        width: Number(recommendedSize),
+        height: Number(recommendedSize),
         fit: sharp.fit.cover, // Принудительное приведение к квадрату 512x512
-      })
-      .toBuffer();
+      });
+    }
+
+    imageBuffer.toBuffer();
 
     const date = new Date().toISOString().split("T")[0];
 

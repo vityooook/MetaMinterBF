@@ -9,13 +9,16 @@ interface ImageUploadPreviewProps {
   value?: string;
   onChange: (value: string) => void;
   accept?: string;
-  resolution?: { width: number; height: number };
+  description?: string;
+  resolution?: number;
 }
 
 export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   value,
   onChange,
   accept = ".jpg,.jpeg,.png,.webp,.gif,.svg",
+  description,
+  resolution,
   ...rest
 }) => {
   const [preview, setPreview] = useState<string | undefined>(value);
@@ -37,7 +40,6 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   const mutation = useMutation({
     mutationFn: uploadImage,
     onSuccess: (data) => {
-      console.log(data.url);
       setPreview(data.url);
       onChange(data.url); // Update the parent component with the URL
     },
@@ -55,7 +57,7 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
     }
 
     // Start the upload
-    mutation.mutate(file);
+    mutation.mutate({file, resolution});
   };
 
   const triggerError = (errorMessage: string) => {
@@ -148,8 +150,11 @@ export const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
         <FormDescription className="text-destructive">{error}</FormDescription>
       )}
       {showDescription && (
-        <FormDescription className="space-x-2">
-          {accept && <span>{accept.replace(/\./g, " ").toUpperCase()}</span>}
+        <FormDescription className="text-center">
+          <p>
+            {accept && <span>{accept.replace(/\./g, " ").toUpperCase()}</span>}
+          </p>
+          <p>{description}</p>
         </FormDescription>
       )}
     </div>

@@ -125,12 +125,22 @@ export const fetchCollections = async (): Promise<CollectionModel[]> => {
   }
 };
 
-export const uploadImage = async (file: File): Promise<UploadedImageModel> => {
+export const uploadImage = async ({
+  file,
+  resolution,
+}: {
+  file: File;
+  resolution?: number;
+}): Promise<UploadedImageModel> => {
   try {
     const accessToken = localStorage.getItem("accessToken");
 
     const formData = new FormData();
     formData.append("file", file);
+
+    if (resolution) {
+      formData.append("resolution", resolution.toString());
+    }
 
     const response = await fetch(`${config.apiUrl}/api/upload/image`, {
       method: "POST",

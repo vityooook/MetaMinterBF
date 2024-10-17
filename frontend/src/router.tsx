@@ -3,7 +3,7 @@ import App from "./app";
 import { CollectionPage } from "./pages/collections/page";
 import { CollectionCreatePage } from "./pages/create/page";
 import { CollectionMintPage } from "./pages/mint/page";
-import { WelcomePage } from "./pages/welcome/page";
+import { OnboardingPage } from "./pages/onboarding/page";
 import { CollectionForm } from "./pages/create/steps/collection";
 import { NftForm } from "./pages/create/steps/nft";
 import { SettingsForm } from "./pages/create/steps/settings";
@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       { path: "", element: <CollectionPage /> },
-      { path: "/welcome", element: <WelcomePage /> },
+      { path: "/onboarding", element: <OnboardingPage /> },
       { path: "/collections", element: <CollectionPage /> },
       {
         path: "/collections/create",

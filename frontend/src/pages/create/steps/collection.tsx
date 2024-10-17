@@ -48,7 +48,6 @@ export const CollectionForm = () => {
 
   const handleSubmit = useCallback(
     (data: FormData) => {
-      console.log("COLLECTION");
       setFormData(data, "nft");
       navigate("/collections/create/nft");
     },
@@ -64,6 +63,8 @@ export const CollectionForm = () => {
     };
   }, [mb]);
 
+  console.log(FormData);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -77,12 +78,14 @@ export const CollectionForm = () => {
                   <ImageUploadPreview
                     value={value}
                     onChange={onChange}
-                    accept=".jpg,.jpeg,.png,.webp,.gif,.svg"
+                    accept=".jpg,.jpeg,.png,.webp,.svg"
+                    description="Optimal dimensions: 512x512"
+                    resolution={512}
                     {...field}
                   />
                 </FormControl>
               </div>
-              <FormMessage />
+              <FormMessage className="text-center" />
             </FormItem>
           )}
         />

@@ -9,21 +9,30 @@ export const useReroute = () => {
   const navigate = useNavigate();
   const launchParams = useLaunchParams();
   const user = useUserStore((state) => state.user);
+  const patchUser = useUserStore((state) => state.patchUser);
 
   useEffect(() => {
+    if (user.isNewUser) {
+      patchUser({
+        isNewUser: false,
+      });
+      
+      navigate("/onboarding");
+    }
+
     if (launchParams.startParam) {
       if (launchParams.startParam?.includes("nft")) {
-        
         const collectionId = launchParams.startParam.split("nft-")[1];
 
-        navigate(`/collections/${collectionId}/mint`);
-
-        // if (user.isOnboarded) {
-          
-        // } else {
-        //   window.localStorage.setItem(REDIRECT_KEY, `/collections/${collectionId}/mint`);
-        // }
+        if (!user.isNewUser) {
+          navigate(`/collections/${collectionId}/mint`);
+        } else {
+          window.localStorage.setItem(
+            REDIRECT_KEY,
+            `/collections/${collectionId}/mint`
+          );
+        }
       }
     }
-  }, [user]);
+  }, [user, launchParams]);
 };

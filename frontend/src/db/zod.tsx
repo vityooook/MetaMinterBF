@@ -2,16 +2,28 @@ import { z } from "zod";
 
 export const nftSchema = z.object({
   image: z.string().min(1, "Please upload collection image"),
-  name: z.string().min(1, "NFT name is required"),
-  description: z.string().min(1, "Description is required"),
+  name: z
+    .string()
+    .min(1, "NFT name is required")
+    .max(60, "Name should be less than 60 symbols"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(700, "Description should be less than 700 symbols"),
 });
 
 export const collectionSchema = z.object({
   _id: z.string().optional(),
   ownerId: z.string().optional(),
   image: z.string().min(1, "Please upload collection image"),
-  name: z.string().min(1, "Collection name is required"),
-  description: z.string().min(1, "Collection description is required"),
+  name: z
+    .string()
+    .min(1, "Collection name is required")
+    .max(60, "Name should be less than 60 symbols"),
+  description: z
+    .string()
+    .min(1, "Collection description is required")
+    .max(700, "Description should be less than 700 symbols"),
   itemsLimit: z.coerce.number().optional(),
   nftPrice: z.coerce
     .number()

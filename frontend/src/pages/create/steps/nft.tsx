@@ -72,12 +72,14 @@ export const NftForm = () => {
                   <ImageUploadPreview
                     value={value}
                     onChange={onChange}
-                    accept=".jpg,.jpeg,.png,.webp,.gif,.svg"
+                    accept=".jpg,.jpeg,.png,.webp,.svg"
+                    description="Optimal dimensions: 2000x2000"
+                    resolution={2000}
                     {...field}
                   />
                 </FormControl>
               </div>
-              <FormMessage />
+              <FormMessage className="text-center" />
             </FormItem>
           )}
         />

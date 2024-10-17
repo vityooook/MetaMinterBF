@@ -106,7 +106,7 @@ export const CollectionViewPage: React.FC = () => {
 
     mb.show()
       .enable()
-      .setText(userAddress ? "Deploy Collection" : "Connect Wallet")
+      .setText(userAddress ? "Deploy (0.3 TON)" : "Connect Wallet")
       .on("click", onDeploy);
 
     return () => {

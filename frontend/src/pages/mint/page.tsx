@@ -107,7 +107,7 @@ export const CollectionMintPage: React.FC = () => {
       }
 
       if (collection?.deployed) {
-        mb.setText("Mint NFT").on("click", onMint);
+        mb.setText("Mint NFT (0.1 TON)").on("click", onMint);
       } else {
         mb.hide();
       }
