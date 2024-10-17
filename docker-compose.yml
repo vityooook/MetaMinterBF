@@ -24,6 +24,12 @@ services:
       BOT_NAME: "${BOT_NAME}"
       NODE_ENV: "${NODE_ENV}"
       APP_URL: "https://api.${PROJECT_URL}"
+      CLOUDFLARE_DOMAIN: "$CLOUDFLARE_DOMAIN"
+      CLOUDFLARE_ACCESS_KEY_ID: "$CLOUDFLARE_ACCESS_KEY_ID"
+      CLOUDFLARE_SECRET_ACCESS_KEY: "$CLOUDFLARE_SECRET_ACCESS_KEY"
+      CLOUDFLARE_BUCKET_NAME: "$CLOUDFLARE_BUCKET_NAME"
+      CLOUDFLARE_R2_ENDPOINT: "$CLOUDFLARE_R2_ENDPOINT"
+
     labels:
       - traefik.enable=true
       - traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}-backend.entrypoints=websecure
