@@ -136,7 +136,7 @@ export const CollectionViewPage: React.FC = () => {
           </div>
 
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
-          <div className="text-muted-foreground">{collection.description}</div>
+          <div className="text-muted-foreground text-center">{collection.description}</div>
 
           {collection && collection.links && collection.links.length > 0 && (
             <div className="flex gap-2">

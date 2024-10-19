@@ -5,6 +5,7 @@ export type UserModel = User & {
   _id?: string;
   isNewUser: boolean;
   isOnboarded: boolean;
+  isAmbasador: boolean;
   walletAddress?: string;
 };
 

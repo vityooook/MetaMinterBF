@@ -19,6 +19,7 @@ export const useUserStore = create<UserStore>()((set) => ({
     languageCode: "",
     isNewUser: false,
     isOnboarded: false,
+    isAmbasador: false,
     walletAddress: undefined,
   },
   isLoading: true,
