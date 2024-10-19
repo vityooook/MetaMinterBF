@@ -38,6 +38,8 @@ export class BotService {
 
         try {
           let user = await this.usersService.findOne({ id: ctx.from.id });
+          const startPayload = ctx.message.text.split(" ")[1]; // Extract the payload after /start
+          const isReferral = startPayload.startsWith("ref-");
 
           if (!user) {
             user = new this.usersService.userModel({
@@ -49,6 +51,22 @@ export class BotService {
             });
 
             await user.save();
+          }
+
+          if (startPayload) {
+            try {
+              if (startPayload.startsWith("ambasador")) {
+                await this.usersService.addAmbasador(ctx.from.id.toString());
+              } else if (Number(startPayload)) {
+                if (isReferral) {
+                  await this.usersService.addReferral(startPayload.replace("ref-", ""), user._id);
+                }
+              } else {
+                console.log("payload:", startPayload);
+              }
+            } catch (error) {
+              //console.error('startPayload', error);
+            }
           }
 
           await this.sendStartMessage(userLang, ctx.from.id);

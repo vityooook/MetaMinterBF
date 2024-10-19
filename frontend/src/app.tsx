@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import {
   bindMiniAppCSSVars,
@@ -13,19 +13,32 @@ import { Toaster } from "~/components/ui/toaster";
 import { useTheme } from "./providers/shadcn-provider";
 import { useCollections } from "./hooks/useCollections";
 import { useReroute } from "./hooks/useReroute";
-import { useWalletAuth } from "~/hooks/useWalletAuth.tsx";
+// import { useWalletAuth } from "~/hooks/useWalletAuth.tsx";
+import { useUserStore } from "./db/userStore";
+import { useTonAddress } from "@tonconnect/ui-react";
+import { useMutation } from "@tanstack/react-query";
+import { addWalletAddress } from "./api/backend";
 
 function App() {
   useAuth();
-  useWalletAuth();
-  useCollections();
   useReroute();
+  // useWalletAuth();
+  useCollections();
 
   const theme = useTheme();
   const themeParams = useThemeParams();
   const miniApp = useMiniApp();
   const mb = useMainButton();
   const viewport = useViewport();
+  const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
+  const isUserLoading = useUserStore((state) => state.isLoading);
+  const userAddress = useTonAddress();
+
+  const walletAddressMutation = useMutation({
+    mutationKey: ["walletAddress"],
+    mutationFn: addWalletAddress,
+  });
 
   useEffect(() => {
     mb.setBgColor("#20d2df").setTextColor("#000000");
@@ -51,6 +64,18 @@ function App() {
   useEffect(() => {
     viewport?.expand();
   }, [viewport]);
+
+  useEffect(() => {
+    if (!user.isOnboarded && !isUserLoading) {
+      navigate("/onboarding");
+    }
+  }, [user.isOnboarded, isUserLoading]);
+
+  useEffect(() => {
+    if (userAddress && user.walletAddress !== userAddress && !isUserLoading) {
+      walletAddressMutation.mutate(userAddress);
+    }
+  }, [userAddress, isUserLoading]);
 
   return (
     <div className="container max-w-xl py-4">

@@ -6,9 +6,9 @@ import {
   useTonConnectUI,
   TonConnectButton,
 } from "@tonconnect/ui-react";
-import { Loader2, ShareIcon, XIcon } from "lucide-react";
+import { Loader2, ShareIcon } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { fetchCollectionById } from "~/api/backend";
 import { Countdown } from "~/components/countdown";
 import { Button } from "~/components/ui/button";
@@ -17,8 +17,7 @@ import { toast } from "~/components/ui/use-toast";
 import { CollectionContract } from "~/contracts/collection";
 import { useBack } from "~/hooks/useBack";
 import { getPlatformIcon, getPlatformTitle } from "~/lib/social-utils";
-import { minifyAddress } from "~/lib/utils";
-import { generateShareUrl } from "../view/page";
+import { generateShareUrl, minifyAddress } from "~/lib/utils";
 import { QuantityField } from "../../components/quantity-field";
 import { Badge } from "~/components/ui/badge";
 import { ConfirmMint } from "./steps/confirm";
@@ -37,7 +36,6 @@ export const CollectionMintPage: React.FC = () => {
 
   const miniApp = useMiniApp();
   const mb = useMainButton();
-  const navigate = useNavigate();
   const utils = useUtils();
   const userAddress = useTonAddress();
   const [quantity, setQuantity] = useState(1);
@@ -45,13 +43,8 @@ export const CollectionMintPage: React.FC = () => {
   const collectionContract = new CollectionContract();
   const [isMinting, setIsMinting] = useState<boolean>(false);
 
-  const isBeforeStartTime = collection?.startTime
-    ? new Date(collection.startTime) > new Date()
-    : false;
-
-  const isAfterEndTime = collection?.endTime
-    ? new Date(collection.endTime) < new Date()
-    : false;
+  const [isBeforeStartTime, setIsBeforeStartTime] = useState<boolean>(false);
+  const [isAfterEndTime, setIsAfterEndTime] = useState<boolean>(false);
 
   const { data: collectionData } = useQuery({
     queryKey: ["collectionData"],
@@ -94,9 +87,21 @@ export const CollectionMintPage: React.FC = () => {
     setIsMinting(false);
   }, [utils, collection]);
 
+  const handleCancel = useCallback(() => {
+    setIsMinting(false);
+  }, [setIsMinting]);
+
   useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");
   }, [miniApp]);
+
+  useEffect(() => {
+    if (isMinting) {
+      mb.hide();
+    } else {
+      mb.show();
+    }
+  }, [isMinting]);
 
   useEffect(() => {
     const onMint = handleMint;
@@ -111,7 +116,7 @@ export const CollectionMintPage: React.FC = () => {
       }
 
       if (collection?.deployed) {
-        mb.setText("Mint NFT (0.1 TON)").on("click", onMint);
+        mb.setText(`Mint NFT (0.1) TON)`).on("click", onMint);
       } else {
         mb.hide();
       }
@@ -122,7 +127,11 @@ export const CollectionMintPage: React.FC = () => {
     return () => {
       mb.hide().off("click", onMint);
     };
-  }, [mb, collection, userAddress, collection, handleMint]);
+  }, [mb, collection, userAddress, isBeforeStartTime, isAfterEndTime, handleMint]);
+
+  useEffect(() => {
+    mb.setText(`Mint NFT (${(0.1 * quantity).toFixed(2)} TON)`);
+  }, [collection?.deployed, quantity]);
 
   useEffect(() => {
     if (isMinting || isBeforeStartTime) {
@@ -130,8 +139,18 @@ export const CollectionMintPage: React.FC = () => {
     }
   }, [isMinting, isBeforeStartTime]);
 
+  useEffect(() => {
+    if (collection?.startTime) {
+      setIsBeforeStartTime(new Date(collection.startTime) > new Date());
+    }
+
+    if (collection?.endTime) {
+      setIsAfterEndTime(new Date(collection.endTime) < new Date());
+    }
+  }, [collection]);
+
   return isMinting ? (
-    <ConfirmMint />
+    <ConfirmMint onCancel={handleCancel} />
   ) : collection ? (
     <div className="-my-4 -mx-4 relative min-h-dvh flex flex-col pb-4">
       <Button
@@ -142,14 +161,14 @@ export const CollectionMintPage: React.FC = () => {
       >
         <ShareIcon className="w-5 h-5" />
       </Button>
-      <Button
+      {/* <Button
         onClick={() => navigate("/")}
         size="icon"
         variant="ghost"
         className="absolute top-4 right-4 bg-background"
       >
         <XIcon className="w-5 h-5" />
-      </Button>
+      </Button> */}
 
       <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
         <div className="relative">

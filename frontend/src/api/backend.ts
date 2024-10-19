@@ -190,3 +190,56 @@ export const fetchCollectionById = async (
     throw error;
   }
 };
+
+export const completeOnboarding = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  try {
+    const response = await fetch(
+      `${config.apiUrl}/api/users/onboarding/complete`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to complete onboarding");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to onboard User", error);
+    throw error;
+  }
+};
+
+export const addWalletAddress = async (walletAddress: string) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  try {
+    const response = await fetch(
+      `${config.apiUrl}/api/users/wallet-address`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ walletAddress }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to add wallet address");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to add wallet address", error);
+    throw error;
+  }
+};

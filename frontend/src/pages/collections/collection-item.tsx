@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Badge } from "~/components/ui/badge";
 import { CollectionModel } from "~/db/models";
 
 interface CollectionItemProps {
@@ -28,9 +29,16 @@ export const CollectionItem: React.FC<CollectionItemProps> = ({
           className="w-10 h-10 rounded-lg"
         />
         <div className="flex-grow flex flex-col justify-between">
-          <div className="text-lg font-semibold truncate max-w-full overflow-hidden">{collection.name}</div>
-          <div className="text-sm text-gray-500">
-            {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit} items
+          <div className="text-lg font-semibold truncate max-w-full overflow-hidden">
+            {collection.name}
+          </div>
+          <div className="flex gap-2 items-center">
+            {collection.deployed && (
+              <Badge>Deployed</Badge>
+            )}
+            <div className="text-sm text-gray-500">
+              {collection.itemsLimit === 0 ? "∞" : collection.itemsLimit} items
+            </div>
           </div>
         </div>
         <div className="text-right flex flex-col justify-between">

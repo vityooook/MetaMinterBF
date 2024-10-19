@@ -20,19 +20,21 @@ import { useUserStore } from "~/db/userStore";
 export function generateReferralTelegramUrl(userId: number, text: string) {
   const encodedText = encodeURIComponent(text);
   const encodedUrl = encodeURIComponent(
-    `https://t.me/${config.botName}/onboarding?startapp=${userId.toString()}`
+    `https://t.me/${config.botName}/onboarding?startapp=ref-${userId.toString()}`
   );
   return `https://t.me/share/url?text=${encodedText}&url=${encodedUrl}`;
 }
 
 export function generateReferralUrl(userId: number) {
-  return `https://t.me/${config.botName}/onboarding?startapp=${userId}`;
+  return `https://t.me/${config.botName}/onboarding?startapp=ref-${userId}`;
 }
 
 export const InviteFriend = ({ className }: { className?: string }) => {
   const { t } = useTranslation();
   const user = useUserStore((state) => state.user);
   const [open, setOpen] = useState<boolean>(false);
+
+  console.log(user)
 
   const isMobile = true;
   const referralLink = generateReferralTelegramUrl(

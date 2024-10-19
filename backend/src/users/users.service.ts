@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
@@ -25,7 +25,12 @@ export class UsersService {
   }
 
   findOneById(id: any) {
-    return this.userModel.findOne({ _id: id }).exec();
+    return this.userModel.findOne({ _id: id }).populate([
+      {
+        path: 'referrals',
+        select: '_id firstName lastName username walletAddress',
+      },
+    ]).exec();
   }
 
   findOne(params: any) {
@@ -43,7 +48,16 @@ export class UsersService {
   }
 
   async findOrCreateTelegramUser(initData: InitData) {
-    let user = await this.userModel.findOne({ id: initData.user.id }).exec();
+    let user = await this.userModel.findOne({ id: initData.user.id }).populate([
+      {
+        path: 'referrals',
+        select: '_id firstName lastName username walletAddress',
+      },
+      {
+        path: 'referrer',
+        select: '_id firstName lastName username walletAddress',
+      },
+    ]).exec();
     if (user) {
       return user;
     }
@@ -72,6 +86,97 @@ export class UsersService {
       return user;
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async completeOnboarding(userId: string) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) throw new UnauthorizedException();
+    if (user.isOnboarded) {
+      throw new ForbiddenException('User is already onboarded');
+    }
+
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          isOnboarded: true,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
+  async addWalletAddress(userId: string, walletAddress: string) {
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { $set: { walletAddress } },
+      { new: true }
+    ).exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return updatedUser;
+  }
+
+  async addAmbasador(userId: string) {
+    try {
+      await this.userModel.updateOne(
+        { _id: userId },
+        {
+          $set: { isAmbasador: true },
+        },
+      );
+    } catch (error) {}
+  }
+
+  async addReferral(referrerId: string, referralId: string) {
+    try {
+      const referrer = await this.userModel.findOne({ id: referrerId }).exec();
+      if (!referrer) throw new NotFoundException();
+
+      const referral = await this.userModel
+        .findOne({
+          _id: referralId,
+          referrer: null,
+          createdAt: {
+            $gte: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+          },
+        })
+        .exec();
+
+      if (!referral) throw new NotFoundException();
+
+      if (referrer.id == referral.id) throw new NotFoundException();
+
+      console.log(referrer)
+
+      if (!referrer.referrals) {
+        referrer.referrals = [referralId];
+      } else {
+        referrer.referrals.push(referralId);
+      }
+
+      await this.userModel.updateOne(
+        { _id: referrer._id },
+        {
+          $set: { referrals: referrer.referrals },
+        },
+      );
+
+      await this.userModel.updateOne(
+        { _id: referralId },
+        {
+          $set: { referrer: referrer._id },
+        },
+      );
+
+      return await this.userModel.findOne({ _id: referrer._id }).exec();
+    } catch (error) {
+      throw error;
     }
   }
 }

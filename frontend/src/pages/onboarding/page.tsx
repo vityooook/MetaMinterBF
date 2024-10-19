@@ -3,10 +3,36 @@ import WelcomeBg from "~/assets/images/WelcomeBg.svg"; // Ensure this is an SVG 
 import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import LogoSvg from "~/assets/images/metaming-logo.svg";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useUserStore } from "~/db/userStore";
+import { completeOnboarding } from "~/api/backend";
+import { REDIRECT_KEY } from "~/config";
 
 export const OnboardingPage = () => {
   const { t } = useTranslation();
+  const patchUser = useUserStore((state) => state.patchUser);
+  const navigate = useNavigate();
+  const redirectKey = window.localStorage.getItem(REDIRECT_KEY);
+
+  const updateUserMutation = useMutation({
+    mutationFn: completeOnboarding,
+  });
+
+  const handleComplete = useCallback(() => {
+    patchUser({
+      isOnboarded: true,
+    });
+
+    if (redirectKey) {
+      navigate(redirectKey);
+    } else {
+      navigate("/");
+    }
+
+    updateUserMutation.mutate();
+  }, [updateUserMutation]);
 
   return (
     <div
@@ -27,8 +53,8 @@ export const OnboardingPage = () => {
           <p className="text-3xl font-bold">{t("welcome_hello")}</p>
           <p className="text-center mt-2">{t("welcome_instruction")}</p>
         </div>
-        <Button asChild size="lg" className="w-full">
-          <Link to="/">Continue</Link>
+        <Button size="lg" className="w-full" onClick={handleComplete}>
+          Open the app
         </Button>
       </div>
     </div>

@@ -4,6 +4,8 @@ import { CollectionFormData, NftFormData } from "~/db/zod";
 export type UserModel = User & {
   _id?: string;
   isNewUser: boolean;
+  isOnboarded: boolean;
+  walletAddress?: string;
 };
 
 export type NftModel = NftFormData & {

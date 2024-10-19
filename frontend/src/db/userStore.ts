@@ -17,7 +17,9 @@ export const useUserStore = create<UserStore>()((set) => ({
     lastName: "",
     username: undefined,
     languageCode: "",
-    isNewUser: false
+    isNewUser: false,
+    isOnboarded: false,
+    walletAddress: undefined,
   },
   isLoading: true,
   setUser: (user) => {

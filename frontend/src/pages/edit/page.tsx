@@ -22,9 +22,8 @@ import { formatToLocalDateTime } from "~/lib/utils";
 import { Switch } from "~/components/ui/switch";
 
 export const CollectionEditPage = () => {
-  useBack("../");
-
   const { collectionId } = useParams();
+  useBack(`/collections/${collectionId}`);
   const mb = useMainButton();
   const editCollection = useEditMutation();
   const collection = useCollectionStore((state) =>
@@ -45,12 +44,10 @@ export const CollectionEditPage = () => {
   });
 
   useEffect(() => {
-    // Check if itemsLimit exists and set showAmount accordingly
     if (form.getValues("itemsLimit")) {
       setShowAmount(true);
     }
 
-    // Check if startTime or endTime exists and set showTimer accordingly
     if (form.getValues("startTime") || form.getValues("endTime")) {
       setShowTimer(true);
     }
@@ -58,10 +55,12 @@ export const CollectionEditPage = () => {
 
   const handleSubmit = useCallback(
     async (data: EditCollectionFormData) => {
-      try {
-        await editCollection.mutateAsync(data);
-      } catch (e) {
-        console.log(e);
+      if (!editCollection.isPending) {
+        try {
+          await editCollection.mutateAsync(data);
+        } catch (e) {
+          console.log(e);
+        }
       }
     },
     [editCollection]
@@ -76,8 +75,16 @@ export const CollectionEditPage = () => {
   };
 
   useEffect(() => {
+    if (editCollection.isPending) {
+      mb.disable().setText("Saving...");
+    } else {
+      mb.enable().setText("Save");
+    }
+  }, [mb, editCollection.isPending]);
+
+  useEffect(() => {
     const onClick = form.handleSubmit(handleSubmit);
-    mb.enable().setText("Continue").show().on("click", onClick);
+    mb.enable().setText("Save").show().on("click", onClick);
 
     return () => {
       mb.hide().off("click", onClick);
@@ -88,7 +95,7 @@ export const CollectionEditPage = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <input type="hidden" {...form.register(`_id`)} />
-        <input type="hidden"  {...form.register(`ownerId`)} />
+        <input type="hidden" {...form.register(`ownerId`)} />
         <FormField
           control={form.control}
           name="nftPrice"

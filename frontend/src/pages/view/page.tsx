@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "~/components/ui/card";
-import { cn, formatDateToLocal, minifyAddress } from "~/lib/utils";
+import { cn, formatDateToLocal, generateShareUrl, minifyAddress } from "~/lib/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
-import { config } from "~/config";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { toast } from "~/components/ui/use-toast.ts";
 import { useCollectionStore } from "~/db/collectionStore";
@@ -14,15 +13,6 @@ import { useDeployMutation } from "../../hooks/useDeployMutation";
 import { ConfirmDeploy } from "./steps/confirm";
 import { getPlatformTitle, getPlatformIcon } from "~/lib/social-utils";
 import { Button } from "~/components/ui/button";
-
-export function generateShareUrl(text: string = "", id: string): string {
-  const encodedText = encodeURIComponent(text);
-  const encodedUrl = encodeURIComponent(
-    `https://t.me/${config.botName}/mint?startapp=nft-${id.toString()}`
-  );
-
-  return `https://t.me/share/url?text=${encodedText}&url=${encodedUrl}`;
-}
 
 export const CollectionViewPage: React.FC = () => {
   useBack("/");
@@ -74,11 +64,13 @@ export const CollectionViewPage: React.FC = () => {
     setIsDeploying(false);
   }, [utils]);
 
+  const handleCancel = useCallback(() => {
+    setIsDeploying(false);
+  }, [setIsDeploying]);
+
   const handleShare = useCallback(() => {
     utils.openTelegramLink(generateShareUrl("Mint my NFT", collection?._id!));
   }, [utils, collection]);
-
-  // const handleDeclineOwnership = useCallback(() => {}, []);
 
   useEffect(() => {
     miniApp.setHeaderColor("#2b2b2b");
@@ -123,7 +115,7 @@ export const CollectionViewPage: React.FC = () => {
   }, [isDeploying]);
 
   return isDeploying ? (
-    <ConfirmDeploy />
+    <ConfirmDeploy onCancel={handleCancel} />
   ) : (
     collection && (
       <div className={cn('-mt-4 -mx-4', !collection.deployed && 'pb-4')}>

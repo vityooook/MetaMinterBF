@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 
 interface QuantityFieldProps {
   nftPrice: number;
-  onQuantityChange?: (quantity: number) => void; // Added optional onChange prop
+  onQuantityChange?: (quantity: number) => void;
 }
 
 export const QuantityField: React.FC<QuantityFieldProps> = ({
@@ -15,24 +15,24 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
 
   const handleDecrement = () => {
-    if (quantity > 0) {
+    if (quantity > 1) {
       const newQuantity = quantity - 1;
       setQuantity(newQuantity);
-      onQuantityChange?.(newQuantity); // Call onChange if provided
+      onQuantityChange?.(newQuantity);
     }
   };
 
   const handleIncrement = () => {
     const newQuantity = quantity + 1;
     setQuantity(newQuantity);
-    onQuantityChange?.(newQuantity); // Call onChange if provided
+    onQuantityChange?.(newQuantity);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
-    if (!isNaN(value) && value >= 0) {
+    if (!isNaN(value) && value >= 1) {
       setQuantity(value);
-      onQuantityChange?.(value); // Call onChange if provided
+      onQuantityChange?.(value);
     }
   };
 
@@ -43,7 +43,8 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({
           onClick={handleDecrement}
           size="icon"
           variant="ghost"
-          className=" bg-card min-w-10"
+          className="bg-card min-w-10"
+          disabled={quantity <= 1}
         >
           <MinusIcon className="w-5 h-5" />
         </Button>
@@ -54,17 +55,17 @@ export const QuantityField: React.FC<QuantityFieldProps> = ({
             type="input"
             pattern="\d*"
             className="bg-transparent border-none text-4xl text-center"
-            min={0} // Ensure that input cannot go below 0
+            min={1}
           />
           <span className="text-muted-foreground">
-            {nftPrice * quantity} TON
+            {(nftPrice * quantity).toFixed(2)} TON
           </span>
         </div>
         <Button
           onClick={handleIncrement}
           size="icon"
           variant="ghost"
-          className=" bg-card min-w-10"
+          className="bg-card min-w-10"
         >
           <PlusIcon className="w-5 h-5" />
         </Button>

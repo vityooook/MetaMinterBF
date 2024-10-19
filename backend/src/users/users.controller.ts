@@ -13,4 +13,14 @@ export class UsersController {
   async update(@CurrentUser() user: User, @Body() updateData: Partial<User>) {
     return this.usersService.update(user._id, updateData);
   }
+
+  @Patch('onboarding/complete')
+  async completeOnboarding(@CurrentUser() user: User) {
+    return this.usersService.completeOnboarding(user._id);
+  }
+
+  @Patch('wallet-address')
+  async addWalletAddress(@CurrentUser() user: User, @Body() body: { walletAddress: string }) {
+    return this.usersService.addWalletAddress(user._id, body.walletAddress);
+  }
 }

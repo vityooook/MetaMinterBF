@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { config } from "~/config";
 import { UserModel } from "~/db/models";
 
 export function cn(...inputs: ClassValue[]) {
@@ -113,3 +114,12 @@ export const formatToLocalDateTime = (
   // Return formatted date string for "datetime-local" input
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
+
+export function generateShareUrl(text: string = "", id: string): string {
+  const encodedText = encodeURIComponent(text);
+  const encodedUrl = encodeURIComponent(
+    `https://t.me/${config.botName}/mint?startapp=nft-${id.toString()}`
+  );
+
+  return `https://t.me/share/url?text=${encodedText}&url=${encodedUrl}`;
+}
