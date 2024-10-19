@@ -60,48 +60,4 @@ const Button = withHapticFeedback(
 );
 Button.displayName = "Button";
 
-interface ConfirmButtonProps extends ButtonProps {
-  onClick: () => void;
-  children: React.ReactNode; // Текст по умолчанию берётся из children
-}
-
-const ConfirmButton = withHapticFeedback(
-  React.forwardRef<HTMLButtonElement, ConfirmButtonProps>(
-    ({ children, onClick, ...props }) => {
-      const [clickCount, setClickCount] = React.useState(0);
-
-      const handleClick = () => {
-        if (clickCount === 2) {
-          onClick(); // Третий клик, вызываем функцию onSubmit
-          setClickCount(0); // Сбрасываем счётчик кликов
-        } else {
-          setClickCount(clickCount + 1); // Увеличиваем счётчик кликов
-        }
-      };
-
-      const getButtonText = () => {
-        switch (clickCount) {
-          case 1:
-            return "Are you sure?";
-          case 2:
-            return "Truly sure?";
-          default:
-            return children;
-        }
-      };
-
-      return (
-        <Button
-          className="bg-card w-full text-destructive"
-          onClick={handleClick}
-          {...props}
-        >
-          {getButtonText()}
-        </Button>
-      );
-    }
-  ),
-  "light"
-);
-
-export { Button, ConfirmButton, buttonVariants };
+export { Button, buttonVariants };

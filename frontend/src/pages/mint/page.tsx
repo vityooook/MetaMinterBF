@@ -116,7 +116,7 @@ export const CollectionMintPage: React.FC = () => {
       }
 
       if (collection?.deployed) {
-        mb.setText(`Mint NFT (0.1) TON)`).on("click", onMint);
+        mb.setText(`Mint NFT (${collection.nftPrice}) TON)`).on("click", onMint);
       } else {
         mb.hide();
       }
@@ -130,8 +130,10 @@ export const CollectionMintPage: React.FC = () => {
   }, [mb, collection, userAddress, isBeforeStartTime, isAfterEndTime, handleMint]);
 
   useEffect(() => {
-    mb.setText(`Mint NFT (${(0.1 * quantity).toFixed(2)} TON)`);
-  }, [collection?.deployed, quantity]);
+    if (collection) {
+      mb.setText(`Mint NFT (${(collection.nftPrice * quantity).toFixed(2)} TON)`);
+    }
+  }, [collection, quantity]);
 
   useEffect(() => {
     if (isMinting || isBeforeStartTime) {
@@ -187,7 +189,7 @@ export const CollectionMintPage: React.FC = () => {
         </div>
 
         <h1 className="text-2xl font-semibold">{collection.name}</h1>
-        <div className="text-muted-foreground">{collection.description}</div>
+        <div className="text-muted-foreground text-center">{collection.description}</div>
 
         {collection.links?.length > 0 && (
           <div className="flex gap-2">

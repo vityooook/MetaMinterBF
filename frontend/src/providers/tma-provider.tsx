@@ -5,7 +5,7 @@ import {
 } from "@telegram-apps/sdk-react";
 import { ReactNode } from "react";
 
-if (import.meta.env.VITE_DEV_USER && false) {
+if (import.meta.env.VITE_DEV_USER) {
   const initDataRaw = import.meta.env.VITE_DEV_USER;
 
   mockTelegramEnv({

@@ -29,6 +29,7 @@ export const CollectionViewPage: React.FC = () => {
   const userAddress = useTonAddress();
   const collectionContract = new CollectionContract();
   const deployCollection = useDeployMutation();
+  const patchCollection = useCollectionStore((state) => state.patchCollection);
 
   const collection = useCollectionStore((state) =>
     state.getCollection(collectionId!)
@@ -37,7 +38,7 @@ export const CollectionViewPage: React.FC = () => {
   const [isDeploying, setIsDeploying] = useState(false);
 
   const handleDeploy = useCallback(async () => {
-    if (!userAddress && tonConnect.modalState.status !== "opened") {
+    if (!userAddress && tonConnect.modalState?.status !== "opened") {
       return tonConnect.openModal();
     }
 
@@ -56,8 +57,14 @@ export const CollectionViewPage: React.FC = () => {
 
       await deployCollection.mutateAsync({
         id: collection?._id,
-        address: payload.address.toString(),
+        address: payload?.address?.toString(),
       });
+
+      patchCollection(collection._id, {
+        deployed: true,
+        address: payload?.address?.toString(),
+      });
+      
     } catch (e) {
       console.log(e);
       toast({
