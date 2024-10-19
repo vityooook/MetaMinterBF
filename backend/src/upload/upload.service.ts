@@ -75,7 +75,7 @@ export class UploadService {
 
     try {
       const uploadResult = await this.s3Client.send(command);
-      return `${process.env.CLOUDFLARE_DOMAIN}${params.Key}`;
+      return `${process.env.CLOUDFLARE_DOMAIN}/${process.env.CLOUDFLARE_BUCKET_NAME}/${params.Key}`;
     } catch (error) {
       console.error("Error uploading to S3:", error);
       throw error;
