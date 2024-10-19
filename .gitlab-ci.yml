@@ -101,7 +101,7 @@ build_production:
     - mkdir -p $DATABASE_PATH/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
     - mkdir -p $DATABASE_PATH/backups/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
     - mkdir -p ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
-    - rsync -a --delete $CI_PROJECT_DIR/ ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH/
+    - rsync -a --delete $CI_PROJECT_DIR/docker-compose.yml ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH/
     - cd ~/builds/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
     - docker compose pull
     - docker compose up -d
