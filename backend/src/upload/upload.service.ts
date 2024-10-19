@@ -20,6 +20,7 @@ export class UploadService {
         secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY,
       },
       region: "auto",
+      forcePathStyle: true,
     });
   }
 
