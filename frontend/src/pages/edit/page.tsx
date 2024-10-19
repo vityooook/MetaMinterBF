@@ -53,6 +53,10 @@ export const CollectionEditPage = () => {
 
   const handleSubmit = useCallback(
     async (data: EditCollectionFormData) => {
+      if (!userAddress && tonConnect.modalState.status !== "opened") {
+        return tonConnect.openModal();
+      }
+      
       if (!collection) {
         return;
       }
@@ -115,7 +119,7 @@ export const CollectionEditPage = () => {
     mb.enable().show().on("click", onClick);
 
     if (collection?.address) {
-      mb.setText("Save (0.3 TON)");
+      mb.setText(userAddress ? "Deploy (0.3 TON)" : "Connect Wallet")
     } else {
       mb.setText("Save");
     }
@@ -123,7 +127,7 @@ export const CollectionEditPage = () => {
     return () => {
       mb.hide().off("click", onClick);
     };
-  }, [mb, collection]);
+  }, [mb, collection, userAddress]);
 
   useEffect(() => {
     if (isDeploying) {
