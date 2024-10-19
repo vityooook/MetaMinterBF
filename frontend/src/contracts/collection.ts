@@ -46,13 +46,9 @@ export type CollectionData = {
 
 export type EditData = {
   tonConnect: TonConnectUI;
-  collectionAddress: Address;
-  price: bigint;
-  buyerLimit: number;
-  startTime: number;
-  endTime: number;
-  available: number;
-  ownerAddress: Address;
+  userAddress: string;
+  collection: CollectionModel;
+  available?: number;
 };
 
 export interface CollectionContractActions {
@@ -69,7 +65,7 @@ export class CollectionContract implements CollectionContractActions {
       client.runMethod(collectionAddress, "get_collection_data", [])
     );
 
-    const owner_user = response.stack.readAddress();
+    const ownerAddress = response.stack.readAddress();
     const admin = response.stack.readAddress();
     const available = response.stack.readBoolean();
     const price = response.stack.readBigNumber();
@@ -82,7 +78,7 @@ export class CollectionContract implements CollectionContractActions {
     const contentItem = decodeContentItem(response.stack.readCell());
 
     return {
-      owner_user,
+      ownerAddress,
       admin,
       available,
       price,
@@ -171,35 +167,27 @@ export class CollectionContract implements CollectionContractActions {
 
   async edit({
     tonConnect,
-    collectionAddress,
-    price,
-    buyerLimit,
-    startTime,
-    endTime,
+    userAddress,
+    collection,
     available,
-    ownerAddress,
-  }: {
-    tonConnect: TonConnectUI;
-    collectionAddress: Address;
-  } & Partial<Omit<EditData, "tonConnect" | "collectionAddress">>) {
+  }: EditData) {
     // Получаем текущие данные коллекции, если какие-то из значений не переданы
-    const currentData = await this.getData(collectionAddress);
+    const currentData = await this.getData(address(collection.address));
 
     const msgBody = await editData({
-      price: price !== undefined ? toNano(price) : currentData.price, // Используем текущее значение, если новое не передано
+      price: collection.nftPrice !== undefined ? toNano(collection.nftPrice) : currentData.price, // Используем текущее значение, если новое не передано
       buyerLimit:
-        buyerLimit !== undefined ? buyerLimit : currentData.buyerLimit,
+        collection.itemsLimit !== undefined ? collection.itemsLimit : currentData.buyerLimit,
       startTime:
-        startTime !== undefined
-          ? Math.floor(Number(new Date(startTime).getTime()) / 1000)
+        collection.startTime !== undefined
+          ? Math.floor(Number(new Date(collection.startTime).getTime()) / 1000)
           : currentData.startTime,
       endTime:
-        endTime !== undefined
-          ? Math.floor(Number(new Date(endTime).getTime()) / 1000)
+        collection.endTime !== undefined
+          ? Math.floor(Number(new Date(collection.endTime).getTime()) / 1000)
           : currentData.endTime,
       available: available !== undefined ? available : currentData.available,
-      ownerAddress:
-        ownerAddress !== undefined ? ownerAddress : currentData.owner_user,
+      ownerAddress: userAddress ? address(userAddress) : currentData.ownerAddress,
     });
 
     try {
@@ -208,7 +196,7 @@ export class CollectionContract implements CollectionContractActions {
           validUntil: Math.floor(Date.now() / 1000) + 90,
           messages: [
             {
-              address: collectionAddress.toString(),
+              address: collection.address.toString(),
               amount: toNano("0.01").toString(),
               payload: msgBody.body,
             },

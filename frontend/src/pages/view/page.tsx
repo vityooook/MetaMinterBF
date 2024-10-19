@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "~/components/ui/card";
-import { cn, formatDateToLocal, generateShareUrl, minifyAddress } from "~/lib/utils";
+import {
+  cn,
+  formatDateToLocal,
+  generateShareUrl,
+  minifyAddress,
+} from "~/lib/utils";
 import { useMainButton, useMiniApp, useUtils } from "@telegram-apps/sdk-react";
 import { useBack } from "~/hooks/useBack";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
@@ -91,15 +96,12 @@ export const CollectionViewPage: React.FC = () => {
   useEffect(() => {
     const onDeploy = handleDeploy;
 
-    if (collection?.deployed) {
-      mb.hide().off("click", onDeploy);
-      return;
+    if (!collection?.deployed) {
+      mb.show()
+        .enable()
+        .setText(userAddress ? "Deploy (0.3 TON)" : "Connect Wallet")
+        .on("click", onDeploy);
     }
-
-    mb.show()
-      .enable()
-      .setText(userAddress ? "Deploy (0.3 TON)" : "Connect Wallet")
-      .on("click", onDeploy);
 
     return () => {
       mb.hide().off("click", onDeploy);
@@ -118,7 +120,7 @@ export const CollectionViewPage: React.FC = () => {
     <ConfirmDeploy onCancel={handleCancel} />
   ) : (
     collection && (
-      <div className={cn('-mt-4 -mx-4', !collection.deployed && 'pb-4')}>
+      <div className={cn("-mt-4 -mx-4", !collection.deployed && "pb-4")}>
         <header className="bg-card space-y-2 flex flex-col items-center pb-4 py-8">
           <div className="relative">
             {collection.image && (
@@ -136,7 +138,9 @@ export const CollectionViewPage: React.FC = () => {
           </div>
 
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
-          <div className="text-muted-foreground text-center">{collection.description}</div>
+          <div className="text-muted-foreground text-center">
+            {collection.description}
+          </div>
 
           {collection && collection.links && collection.links.length > 0 && (
             <div className="flex gap-2">
@@ -206,7 +210,12 @@ export const CollectionViewPage: React.FC = () => {
               Нажмите на кнопку три раза подряд, чтобы подтвердить свой выбор
             </p>
           </div> */}
-          {!collection.deployed && <p className="text-xs bg-background text-muted-foreground text-center p-2 px-6 fixed bottom-0 left-0 right-0">Commissions: 0.3 TON to deploy a collection <br /> and 0.1 TON per mint.</p> }
+          {!collection.deployed && (
+            <p className="text-xs bg-background text-muted-foreground text-center p-2 px-6 fixed bottom-0 left-0 right-0">
+              Commissions: 0.3 TON to deploy a collection <br /> and 0.1 TON per
+              mint.
+            </p>
+          )}
         </section>
       </div>
     )

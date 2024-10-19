@@ -20,6 +20,9 @@ import { useParams } from "react-router-dom";
 import { useCollectionStore } from "~/db/collectionStore";
 import { formatToLocalDateTime } from "~/lib/utils";
 import { Switch } from "~/components/ui/switch";
+import { CollectionContract } from "~/contracts/collection";
+import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
+import { ConfirmDeploy } from "./steps/confirm";
 
 export const CollectionEditPage = () => {
   const { collectionId } = useParams();
@@ -33,6 +36,11 @@ export const CollectionEditPage = () => {
   const [showAmount, setShowAmount] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
 
+  const collectionContract = new CollectionContract();
+  const [tonConnect] = useTonConnectUI();
+  const userAddress = useTonAddress();
+  const [isDeploying, setIsDeploying] = useState(false);
+
   const form = useForm<EditCollectionFormData>({
     mode: "onSubmit",
     resolver: zodResolver(editCollectionSchema),
@@ -42,6 +50,46 @@ export const CollectionEditPage = () => {
       endTime: formatToLocalDateTime(collection?.endTime),
     },
   });
+
+  const handleSubmit = useCallback(
+    async (data: EditCollectionFormData) => {
+      if (!collection) {
+        return;
+      }
+
+      if (!editCollection.isPending) {
+        try {
+          if (collection.address) {
+            setIsDeploying(true);
+            await collectionContract.edit({
+              tonConnect,
+              userAddress,
+              collection,
+            });
+          }
+
+          await editCollection.mutateAsync(data);
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setIsDeploying(false);
+        }
+      }
+    },
+    [editCollection, collectionContract, userAddress, tonConnect, collection]
+  );
+
+  const [fromDate, setFromDate] = useState<string>("");
+
+  const today = new Date().toISOString().slice(0, 16);
+
+  const handleFromDateChange = (value: string) => {
+    setFromDate(value);
+  };
+
+  const handleCancel = useCallback(() => {
+    setIsDeploying(false);
+  }, [setIsDeploying]);
 
   useEffect(() => {
     if (form.getValues("itemsLimit")) {
@@ -53,27 +101,6 @@ export const CollectionEditPage = () => {
     }
   }, [form]);
 
-  const handleSubmit = useCallback(
-    async (data: EditCollectionFormData) => {
-      if (!editCollection.isPending) {
-        try {
-          await editCollection.mutateAsync(data);
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    },
-    [editCollection]
-  );
-
-  const [fromDate, setFromDate] = useState<string>("");
-
-  const today = new Date().toISOString().slice(0, 16);
-
-  const handleFromDateChange = (value: string) => {
-    setFromDate(value);
-  };
-
   useEffect(() => {
     if (editCollection.isPending) {
       mb.disable().setText("Saving...");
@@ -84,14 +111,31 @@ export const CollectionEditPage = () => {
 
   useEffect(() => {
     const onClick = form.handleSubmit(handleSubmit);
-    mb.enable().setText("Save").show().on("click", onClick);
+
+    mb.enable().show().on("click", onClick);
+
+    if (collection?.address) {
+      mb.setText("Save (0.3 TON)");
+    } else {
+      mb.setText("Save");
+    }
 
     return () => {
       mb.hide().off("click", onClick);
     };
-  }, [mb]);
+  }, [mb, collection]);
 
-  return (
+  useEffect(() => {
+    if (isDeploying) {
+      mb.hide();
+    } else {
+      mb.show();
+    }
+  }, [isDeploying]);
+
+  return isDeploying ? (
+    <ConfirmDeploy onCancel={handleCancel} />
+  ) : (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <input type="hidden" {...form.register(`_id`)} />
